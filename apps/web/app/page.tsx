@@ -490,6 +490,7 @@ export default function Home() {
             setResetToken(undefined);
           }}
           onSuccess={() => {
+            setNotice('');
             setAuth(false);
             setResetToken(undefined);
             refreshUser();

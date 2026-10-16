@@ -4,12 +4,13 @@ import { database, transaction } from '../src/db';
 import { migrate } from '../src/migrate';
 import { buildApp } from '../src/app';
 import { readConfig } from '../src/config';
+import { recovery, resetPassword, authenticate } from '../src/identity';
 import { register, verifyEmail, login, totpCode, base32 } from '../src/identity';
 import { instantCommit, playInstant } from '../src/instant';
 import { createRoom, purchase, advanceRound, proof } from '../src/rooms';
 import { postLedger } from '../src/wallet';
 import { encryptSeed, hash, drawSequence } from '@bingo/domain/rng';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { once } from 'node:events';
 import type pg from 'pg';
 import type { FastifyInstance } from 'fastify';
@@ -102,6 +103,26 @@ describe('PostgreSQL real: identidade, integridade e recuperação', () => {
     expect(me.json().balance).toBe('100000');
     const other = await app.inject({ url: '/v1/me', cookies: { session: 'bad' } });
     expect(other.statusCode).toBe(401);
+    const originalMail = await pool.query<{ body: string }>(
+      'SELECT body FROM email_outbox WHERE recipient=$1 ORDER BY created_at LIMIT 1',
+      ['identity@example.test'],
+    );
+    const originalToken = /verify=([a-f0-9]{64})/.exec(originalMail.rows[0]!.body)![1]!;
+    await expect(verifyEmail(pool, originalToken)).rejects.toThrow('TOKEN_INVALID');
+    await recovery(pool, 'identity@example.test', origin);
+    const resetMail = await pool.query<{ body: string }>(
+      'SELECT body FROM email_outbox WHERE recipient=$1 ORDER BY created_at DESC LIMIT 1',
+      ['identity@example.test'],
+    );
+    const resetToken = /reset=([a-f0-9]{64})/.exec(resetMail.rows[0]!.body)![1]!;
+    await resetPassword(pool, resetToken, 'changed-password-1234');
+    await expect(authenticate(pool, s.token)).rejects.toThrow('UNAUTHENTICATED');
+    await expect(login(pool, 'identity@example.test', 'test-password-1234', key)).rejects.toThrow(
+      'INVALID_CREDENTIALS',
+    );
+    expect(
+      (await login(pool, 'identity@example.test', 'changed-password-1234', key)).token,
+    ).toHaveLength(64);
   });
   it('duas compras simultâneas não gastam o mesmo saldo', async () => {
     const id = await player('concurrent@example.test');
@@ -346,6 +367,37 @@ describe('PostgreSQL real: identidade, integridade e recuperação', () => {
       (await pool.query('SELECT balance::text FROM wallets WHERE user_id=$1', [id])).rows[0]
         .balance,
     ).toBe((99900n + BigInt(result.payout)).toString());
+  });
+  it('papel runtime usa a carteira sem possuir privilégios de migração ou mutação do razão', async () => {
+    execFileSync(
+      process.execPath,
+      ['--import', import.meta.resolve('tsx'), 'apps/api/src/provision-local-role.ts'],
+      { cwd: process.cwd(), env: { ...process.env, NODE_ENV: 'test', DATABASE_URL: databaseUrl } },
+    );
+    const url = new URL(databaseUrl);
+    url.username = 'bingo_app';
+    url.password = 'local-app-only';
+    const runtime = database(url.toString()).pool;
+    try {
+      await expect(
+        runtime.query('ALTER TABLE ledger_entries DISABLE TRIGGER ledger_entries_immutable'),
+      ).rejects.toThrow();
+      await expect(runtime.query('UPDATE ledger_entries SET amount=amount')).rejects.toThrow(
+        'permission denied',
+      );
+      await expect(runtime.query('SELECT * FROM schema_migrations')).rejects.toThrow(
+        'permission denied',
+      );
+      const id = await player('runtime@example.test');
+      const room = await createRoom(runtime, key, id, input());
+      await purchase(runtime, key, id, room.id, 1, 'runtime-purchase-key');
+      expect(
+        (await runtime.query('SELECT balance::text FROM wallets WHERE user_id=$1', [id])).rows[0]
+          .balance,
+      ).toBe('90000');
+    } finally {
+      await runtime.end();
+    }
   });
   it('conciliação fecha e o razão global soma zero depois de todos os cenários', async () => {
     const result = await pool.query(

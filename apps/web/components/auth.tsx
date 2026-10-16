@@ -183,7 +183,9 @@ export function Auth({
             </button>
           )}
         </div>
-        <div className="fineprint">Sem depósitos. Sem saques. Apenas créditos de demonstração.</div>
+        <div className="fineprint">
+          DEMONSTRAÇÃO — créditos fictícios sem valor monetário. Sem depósitos ou saques.
+        </div>
       </section>
     </dialog>
   );

@@ -272,15 +272,42 @@ export function Instant({ user, onBalance }: { user: User; onBalance: () => void
                 {Object.entries(game?.payoutBps ?? {}).map(([p, bps]) => (
                   <tr key={p}>
                     <td>{names[p] ?? p}</td>
-                    <td>{(bps / 10000).toLocaleString('pt-BR')}×</td>
+                    <td>{(bps / 10000).toLocaleString('pt-BR', { maximumFractionDigits: 4 })}×</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="math-note">
-              Valores arredondados para baixo ao centésimo de crédito. Classes de retorno e
-              probabilidades exatas disponíveis na API pública /v1/instant/game.
+            <p className="math-note">Valores arredondados para baixo ao centésimo de crédito.</p>
+            <h3>Probabilidades por retorno</h3>
+            <p>
+              Classes exclusivas: quando vários padrões se completam, conta somente o maior
+              pagamento.
             </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Retorno total</th>
+                  <th>Probabilidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {game?.probabilities.map((p) => (
+                  <tr key={p.multiplierBps}>
+                    <td>
+                      {(p.multiplierBps / 10000).toLocaleString('pt-BR', {
+                        maximumFractionDigits: 4,
+                      })}
+                      ×
+                    </td>
+                    <td>
+                      {p.probability < 1e-8
+                        ? 'Menor que 0,000001%'
+                        : `${(p.probability * 100).toLocaleString('pt-BR', { maximumFractionDigits: 6 })}%`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
         </aside>
       </div>

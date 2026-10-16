@@ -101,6 +101,7 @@ test('cadastro até premiação verificável, carteira e bingo individual', asyn
     });
     await page.getByRole('button', { name: 'Verificar resultado' }).click();
     await expect(page.getByText(/Verificada. Compromisso e sequência conferem/)).toBeVisible();
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await page.screenshot({
       path: `test-results/game-completed-${test.info().project.name}.png`,
       fullPage: true,
@@ -127,6 +128,7 @@ test('cadastro até premiação verificável, carteira e bingo individual', asyn
     await expect(
       page.getByText('Compromisso, cartela, pagamento e 30 bolas verificados neste navegador.'),
     ).toBeVisible();
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await page.screenshot({
       path: `test-results/instant-result-${test.info().project.name}.png`,
       fullPage: true,
