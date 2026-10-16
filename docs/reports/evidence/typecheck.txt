@@ -7,20 +7,20 @@ $ turbo typecheck
 
  WARNING  failed to get git status for dirty hash: Git error: fatal: not a git repository (or any of the parent directories): .git
 
-@bingo/bingo-math:typecheck: cache hit, replaying logs 25a87ea85af7dd80
-@bingo/bingo-math:typecheck: $ tsc --noEmit
-@bingo/domain:typecheck: cache hit, replaying logs 7089061c4edbc19f
-@bingo/domain:typecheck: $ tsc --noEmit
 @bingo/protocol:typecheck: cache hit, replaying logs 35279b26a3bbcb6e
 @bingo/protocol:typecheck: $ tsc --noEmit
-@bingo/api:typecheck: cache miss, executing 4b6d3c5b8e191005
-@bingo/admin:typecheck: cache hit, replaying logs b066ad897fcc6c91
-@bingo/web:typecheck: cache hit, replaying logs 2c5218b7f3a35662
+@bingo/bingo-math:typecheck: cache hit, replaying logs 25a87ea85af7dd80
+@bingo/bingo-math:typecheck: $ tsc --noEmit
+@bingo/domain:typecheck: cache hit, replaying logs 298f988109a79faa
+@bingo/domain:typecheck: $ tsc --noEmit
+@bingo/admin:typecheck: cache hit, replaying logs a05c783c70205e13
 @bingo/admin:typecheck: $ tsc --noEmit
-@bingo/web:typecheck: $ tsc --noEmit
+@bingo/api:typecheck: cache hit, replaying logs 1ebb2249ef3c8d4a
 @bingo/api:typecheck: $ tsc --noEmit
+@bingo/web:typecheck: cache miss, executing 55de76e854fcbdc7
+@bingo/web:typecheck: $ tsc --noEmit
 
  Tasks:    6 successful, 6 total
 Cached:    5 cached, 6 total
-  Time:    3.734s 
+  Time:    2.498s 
 

@@ -1,8 +1,9 @@
 'use client';
+import type { Card } from '@bingo/domain';
 import { useState, useEffect, useRef } from 'react';
 import { Check, ShieldCheck, ArrowRight, RotateCcw } from 'lucide-react';
-import { api, credits, type CardData, type User } from '../lib/api';
-import { verifyDraw } from '../lib/verifier';
+import { api, credits, type User } from '../lib/api';
+import { verifyInstant } from '../lib/verifier';
 type Game = {
   version: string;
   draws: number;
@@ -14,7 +15,7 @@ type Game = {
 type Result = {
   id: string;
   version: string;
-  card: CardData['card'];
+  card: Card;
   drawn: number[];
   payout: string;
   stake: string;
@@ -108,8 +109,8 @@ export function Instant({ user, onBalance }: { user: User; onBalance: () => void
     if (!result) return;
     try {
       setVerification(
-        (await verifyDraw({ ...result, variant: 75 }))
-          ? 'Compromisso e 30 bolas verificados neste navegador.'
+        game && (await verifyInstant(result, game.payoutBps))
+          ? 'Compromisso, cartela, pagamento e 30 bolas verificados neste navegador.'
           : 'A prova apresentou uma divergência.',
       );
     } catch {

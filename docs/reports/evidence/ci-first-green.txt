@@ -1,0 +1,901 @@
+﻿2026-10-16T13:21:37.7988501Z Current runner version: '2.337.0'
+2026-10-16T13:21:37.8016132Z ##[group]Runner Image Provisioner
+2026-10-16T13:21:37.8017061Z Hosted Compute Agent
+2026-10-16T13:21:37.8017783Z Version: 20261012.601
+2026-10-16T13:21:37.8018476Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-16T13:21:37.8019256Z Build Date: 2026-10-12T17:48:21Z
+2026-10-16T13:21:37.8020302Z Worker ID: {e2af5550-7f45-4a4b-9494-8935ab91162f}
+2026-10-16T13:21:37.8021120Z Region: northcentralus
+2026-10-16T13:21:37.8021754Z Cloud: Azure
+2026-10-16T13:21:37.8022439Z ##[endgroup]
+2026-10-16T13:21:37.8024234Z ##[group]Operating System
+2026-10-16T13:21:37.8024976Z Ubuntu
+2026-10-16T13:21:37.8025595Z 24.04.5
+2026-10-16T13:21:37.8026158Z LTS
+2026-10-16T13:21:37.8026877Z ##[endgroup]
+2026-10-16T13:21:37.8027460Z ##[group]Runner Image
+2026-10-16T13:21:37.8028130Z Image: ubuntu-24.04
+2026-10-16T13:21:37.8028753Z Version: 20261012.334.1
+2026-10-16T13:21:37.8030676Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-16T13:21:37.8032268Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-16T13:21:37.8033307Z ##[endgroup]
+2026-10-16T13:21:37.8034517Z ##[group]GITHUB_TOKEN Permissions
+2026-10-16T13:21:37.8036810Z Contents: read
+2026-10-16T13:21:37.8037471Z Metadata: read
+2026-10-16T13:21:37.8038130Z ##[endgroup]
+2026-10-16T13:21:37.8041003Z Secret source: Actions
+2026-10-16T13:21:37.8042137Z Cache mode: write
+2026-10-16T13:21:37.8042909Z Prepare workflow directory
+2026-10-16T13:21:37.8395789Z Prepare all required actions
+2026-10-16T13:21:37.8445900Z Getting action download info
+2026-10-16T13:21:38.1449047Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-16T13:21:38.2595536Z Download action repository 'pnpm/action-setup@v4' (SHA:b906affcce14559ad1aafd4ab0e942779e9f58b1)
+2026-10-16T13:21:38.6954837Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-16T13:21:38.7820521Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-16T13:21:39.0058048Z Complete job name: verify
+2026-10-16T13:21:39.0889802Z ##[group]Run actions/checkout@v4
+2026-10-16T13:21:39.0890932Z with:
+2026-10-16T13:21:39.0891431Z   repository: betwenes-ops/bingo
+2026-10-16T13:21:39.0895629Z   token: ***
+2026-10-16T13:21:39.0896115Z   ssh-strict: true
+2026-10-16T13:21:39.0896611Z   ssh-user: git
+2026-10-16T13:21:39.0897098Z   persist-credentials: true
+2026-10-16T13:21:39.0897626Z   clean: true
+2026-10-16T13:21:39.0898116Z   sparse-checkout-cone-mode: true
+2026-10-16T13:21:39.0898680Z   fetch-depth: 1
+2026-10-16T13:21:39.0899152Z   fetch-tags: false
+2026-10-16T13:21:39.0899639Z   show-progress: true
+2026-10-16T13:21:39.0900265Z   lfs: false
+2026-10-16T13:21:39.0900727Z   submodules: false
+2026-10-16T13:21:39.0901230Z   set-safe-directory: true
+2026-10-16T13:21:39.0901782Z   allow-unsafe-pr-checkout: false
+2026-10-16T13:21:39.0902624Z ##[endgroup]
+2026-10-16T13:21:39.1936623Z Syncing repository: betwenes-ops/bingo
+2026-10-16T13:21:39.1939595Z ##[group]Getting Git version info
+2026-10-16T13:21:39.1941141Z Working directory is '/home/runner/work/bingo/bingo'
+2026-10-16T13:21:39.1943001Z [command]/usr/bin/git version
+2026-10-16T13:21:39.1986446Z git version 2.55.0
+2026-10-16T13:21:39.2007692Z ##[endgroup]
+2026-10-16T13:21:39.2023733Z Temporarily overriding HOME='/home/runner/work/_temp/3ef12ea6-7b50-45ea-9a72-b7f0b8e91614' before making global git config changes
+2026-10-16T13:21:39.2027035Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T13:21:39.2030710Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bingo/bingo
+2026-10-16T13:21:39.2088039Z Deleting the contents of '/home/runner/work/bingo/bingo'
+2026-10-16T13:21:39.2093164Z ##[group]Initializing the repository
+2026-10-16T13:21:39.2097366Z [command]/usr/bin/git init /home/runner/work/bingo/bingo
+2026-10-16T13:21:39.2178060Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-16T13:21:39.2179423Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-16T13:21:39.2180667Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-16T13:21:39.2181486Z hint: call:
+2026-10-16T13:21:39.2182247Z hint:
+2026-10-16T13:21:39.2182866Z hint: 	git config --global init.defaultBranch <name>
+2026-10-16T13:21:39.2183552Z hint:
+2026-10-16T13:21:39.2184185Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-16T13:21:39.2185224Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-16T13:21:39.2186026Z hint:
+2026-10-16T13:21:39.2186494Z hint: 	git branch -m <name>
+2026-10-16T13:21:39.2187021Z hint:
+2026-10-16T13:21:39.2187696Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-16T13:21:39.2192170Z Initialized empty Git repository in /home/runner/work/bingo/bingo/.git/
+2026-10-16T13:21:39.2203863Z [command]/usr/bin/git remote add origin https://github.com/betwenes-ops/bingo
+2026-10-16T13:21:39.2250346Z ##[endgroup]
+2026-10-16T13:21:39.2251265Z ##[group]Disabling automatic garbage collection
+2026-10-16T13:21:39.2254597Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-16T13:21:39.2289934Z ##[endgroup]
+2026-10-16T13:21:39.2291384Z ##[group]Setting up auth
+2026-10-16T13:21:39.2297618Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T13:21:39.2333559Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T13:21:39.2692069Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T13:21:39.2722065Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T13:21:39.2975528Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T13:21:39.3013453Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T13:21:39.3255611Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-16T13:21:39.3298934Z ##[endgroup]
+2026-10-16T13:21:39.3299850Z ##[group]Fetching the repository
+2026-10-16T13:21:39.3308872Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +2db19b36a0e0c6e6ea93fc32c6572fed4a1bed6b:refs/remotes/origin/main
+2026-10-16T13:21:39.6868060Z From https://github.com/betwenes-ops/bingo
+2026-10-16T13:21:39.6870674Z  * [new ref]         2db19b36a0e0c6e6ea93fc32c6572fed4a1bed6b -> origin/main
+2026-10-16T13:21:39.6875268Z ##[endgroup]
+2026-10-16T13:21:39.6877096Z ##[group]Determining the checkout info
+2026-10-16T13:21:39.6879064Z ##[endgroup]
+2026-10-16T13:21:39.6882277Z [command]/usr/bin/git sparse-checkout disable
+2026-10-16T13:21:39.6937237Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-16T13:21:39.6975094Z ##[group]Checking out the ref
+2026-10-16T13:21:39.6979965Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-16T13:21:39.7100546Z Switched to a new branch 'main'
+2026-10-16T13:21:39.7107280Z branch 'main' set up to track 'origin/main'.
+2026-10-16T13:21:39.7112543Z ##[endgroup]
+2026-10-16T13:21:39.7230227Z [command]/usr/bin/git log -1 --format=%H
+2026-10-16T13:21:39.7232479Z 2db19b36a0e0c6e6ea93fc32c6572fed4a1bed6b
+2026-10-16T13:21:39.7546438Z ##[group]Run pnpm/action-setup@v4
+2026-10-16T13:21:39.7547671Z with:
+2026-10-16T13:21:39.7548545Z   version: 11.25.0
+2026-10-16T13:21:39.7549509Z   dest: ~/setup-pnpm
+2026-10-16T13:21:39.7550881Z   run_install: null
+2026-10-16T13:21:39.7551840Z   cache: false
+2026-10-16T13:21:39.7552844Z   cache_dependency_path: pnpm-lock.yaml
+2026-10-16T13:21:39.7554148Z   package_json_file: package.json
+2026-10-16T13:21:39.7555330Z   standalone: false
+2026-10-16T13:21:39.7556282Z ##[endgroup]
+2026-10-16T13:21:39.9065430Z ##[group]Running self-installer...
+2026-10-16T13:21:40.3024134Z (node:2311) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-16T13:21:40.3031136Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-16T13:21:40.4824617Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-16T13:21:40.4927627Z Packages: +1
+2026-10-16T13:21:40.4929549Z +
+2026-10-16T13:21:40.8134217Z Progress: resolved 1, reused 0, downloaded 1, added 1, done
+2026-10-16T13:21:40.8584093Z 
+2026-10-16T13:21:40.8584741Z dependencies:
+2026-10-16T13:21:40.8585290Z + pnpm 11.25.0 (12.14.0 is available)
+2026-10-16T13:21:40.8585623Z 
+2026-10-16T13:21:40.8608463Z Done in 772ms
+2026-10-16T13:21:40.8832558Z ##[endgroup]
+2026-10-16T13:21:40.8833064Z Installation Completed!
+2026-10-16T13:21:40.9040539Z ##[group]Run actions/setup-node@v4
+2026-10-16T13:21:40.9040846Z with:
+2026-10-16T13:21:40.9041058Z   node-version: 24
+2026-10-16T13:21:40.9041296Z   cache: pnpm
+2026-10-16T13:21:40.9041516Z   always-auth: false
+2026-10-16T13:21:40.9041759Z   check-latest: false
+2026-10-16T13:21:40.9044235Z   token: ***
+2026-10-16T13:21:40.9044477Z env:
+2026-10-16T13:21:40.9044757Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:21:40.9045096Z ##[endgroup]
+2026-10-16T13:21:41.0473773Z Found in cache @ /opt/hostedtoolcache/node/24.21.0/x64
+2026-10-16T13:21:41.0478620Z (node:2326) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-16T13:21:41.0479553Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-16T13:21:41.0481496Z ##[group]Environment details
+2026-10-16T13:21:44.4889830Z node: v24.21.0
+2026-10-16T13:21:44.4890397Z npm: 11.19.0
+2026-10-16T13:21:44.4890725Z yarn: 1.22.22
+2026-10-16T13:21:44.4891827Z ##[endgroup]
+2026-10-16T13:21:44.4939825Z [command]/home/runner/setup-pnpm/node_modules/.bin/pnpm store path --silent
+2026-10-16T13:21:45.4743794Z /home/runner/setup-pnpm/node_modules/.bin/store/v11
+2026-10-16T13:21:45.6326948Z pnpm cache is not found
+2026-10-16T13:21:45.6464175Z ##[group]Run pnpm install --frozen-lockfile
+2026-10-16T13:21:45.6464612Z [36;1mpnpm install --frozen-lockfile[0m
+2026-10-16T13:21:45.6748069Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:21:45.6748412Z env:
+2026-10-16T13:21:45.6748692Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:21:45.6749017Z ##[endgroup]
+2026-10-16T13:21:46.1340770Z Scope: all 7 workspace projects
+2026-10-16T13:21:46.3287507Z ? Verifying lockfile against supply-chain policies (549 entries)...
+2026-10-16T13:21:46.3416494Z Lockfile is up to date, resolution step is skipped
+2026-10-16T13:21:46.4874233Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-16T13:21:46.5321468Z Packages: +441
+2026-10-16T13:21:46.5322697Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2026-10-16T13:21:47.5198946Z Progress: resolved 441, reused 0, downloaded 18, added 0
+2026-10-16T13:21:48.1128275Z Packages are hard linked from the content-addressable store to the virtual store.
+2026-10-16T13:21:48.1129818Z   Content-addressable store is at: /home/runner/setup-pnpm/node_modules/.bin/store/v11
+2026-10-16T13:21:48.1131076Z   Virtual store is at:             node_modules/.pnpm
+2026-10-16T13:21:48.5299949Z Progress: resolved 441, reused 0, downloaded 102, added 4
+2026-10-16T13:21:49.5288493Z Progress: resolved 441, reused 0, downloaded 233, added 16
+2026-10-16T13:21:50.5293839Z Progress: resolved 441, reused 0, downloaded 353, added 24
+2026-10-16T13:21:51.5323592Z Progress: resolved 441, reused 0, downloaded 439, added 158
+2026-10-16T13:21:52.4349288Z Progress: resolved 441, reused 0, downloaded 441, added 441, done
+2026-10-16T13:21:52.7858573Z ✓ Lockfile passes supply-chain policies (549 entries in 6.4s)
+2026-10-16T13:21:52.7935831Z .../argon2@0.45.1/node_modules/argon2 install$ cross-env ZERO_AR_DATE=1 node-gyp-build
+2026-10-16T13:21:52.8197117Z .../esbuild@0.28.2/node_modules/esbuild postinstall$ node install.js
+2026-10-16T13:21:52.8928483Z .../esbuild@0.28.2/node_modules/esbuild postinstall: Done
+2026-10-16T13:21:52.9389517Z .../argon2@0.45.1/node_modules/argon2 install: Done
+2026-10-16T13:21:53.0239474Z 
+2026-10-16T13:21:53.0240293Z devDependencies:
+2026-10-16T13:21:53.0240764Z + @eslint/js 10.0.1
+2026-10-16T13:21:53.0241166Z + @playwright/test 1.64.1
+2026-10-16T13:21:53.0241599Z + @sparticuz/chromium 153.0.0
+2026-10-16T13:21:53.0242094Z + @testcontainers/postgresql 12.2.1
+2026-10-16T13:21:53.0242565Z + @types/node 26.6.5
+2026-10-16T13:21:53.0243019Z + @vitest/coverage-v8 5.0.4
+2026-10-16T13:21:53.0243465Z + eslint 10.12.0
+2026-10-16T13:21:53.0243815Z + fast-check 4.10.2
+2026-10-16T13:21:53.0244195Z + prettier 3.9.10
+2026-10-16T13:21:53.0244555Z + testcontainers 12.2.1
+2026-10-16T13:21:53.0244993Z + turbo 2.11.8
+2026-10-16T13:21:53.0245331Z + typescript 6.0.3
+2026-10-16T13:21:53.0245718Z + typescript-eslint 8.71.2
+2026-10-16T13:21:53.0246108Z + vitest 5.0.4
+2026-10-16T13:21:53.0246290Z 
+2026-10-16T13:21:53.0667977Z Done in 7.3s using pnpm v11.25.0
+2026-10-16T13:21:53.1871304Z ##[group]Run pnpm format:check
+2026-10-16T13:21:53.1871637Z [36;1mpnpm format:check[0m
+2026-10-16T13:21:53.1941617Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:21:53.1941882Z env:
+2026-10-16T13:21:53.1942154Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:21:53.1942478Z ##[endgroup]
+2026-10-16T13:21:53.6535057Z $ prettier --check .
+2026-10-16T13:21:53.7435616Z Checking formatting...
+2026-10-16T13:21:55.2422102Z All matched files use Prettier code style!
+2026-10-16T13:21:55.2906628Z ##[group]Run pnpm lint
+2026-10-16T13:21:55.2907072Z [36;1mpnpm lint[0m
+2026-10-16T13:21:55.3004294Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:21:55.3004703Z env:
+2026-10-16T13:21:55.3005111Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:21:55.3005617Z ##[endgroup]
+2026-10-16T13:21:55.7326605Z $ eslint .
+2026-10-16T13:21:57.4954360Z ##[group]Run pnpm typecheck
+2026-10-16T13:21:57.4954660Z [36;1mpnpm typecheck[0m
+2026-10-16T13:21:57.5023789Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:21:57.5024050Z env:
+2026-10-16T13:21:57.5024320Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:21:57.5024638Z ##[endgroup]
+2026-10-16T13:21:57.9402775Z $ turbo typecheck
+2026-10-16T13:21:57.9809213Z 
+2026-10-16T13:21:57.9809787Z Attention:
+2026-10-16T13:21:57.9810669Z Turborepo now collects completely anonymous telemetry regarding usage.
+2026-10-16T13:21:57.9811660Z This information is used to shape the Turborepo roadmap and prioritize features.
+2026-10-16T13:21:57.9812731Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-10-16T13:21:57.9813404Z https://turborepo.dev/docs/telemetry
+2026-10-16T13:21:57.9813612Z 
+2026-10-16T13:21:57.9901228Z 
+2026-10-16T13:21:57.9916380Z    • Packages in scope: @bingo/admin, @bingo/api, @bingo/bingo-math, @bingo/domain, @bingo/protocol, @bingo/web
+2026-10-16T13:21:57.9917467Z    • Running typecheck in 6 packages
+2026-10-16T13:21:57.9920642Z    • Remote caching disabled
+2026-10-16T13:21:57.9921024Z 
+2026-10-16T13:22:00.4315940Z ##[group]@bingo/protocol:typecheck
+2026-10-16T13:22:00.4318547Z cache miss, executing 35279b26a3bbcb6e
+2026-10-16T13:22:00.4326935Z $ tsc --noEmit
+2026-10-16T13:22:00.4341865Z ##[endgroup]
+2026-10-16T13:22:00.5579489Z ##[group]@bingo/bingo-math:typecheck
+2026-10-16T13:22:00.5603088Z cache miss, executing 25a87ea85af7dd80
+2026-10-16T13:22:00.5630778Z $ tsc --noEmit
+2026-10-16T13:22:00.5662870Z ##[endgroup]
+2026-10-16T13:22:00.8475225Z ##[group]@bingo/domain:typecheck
+2026-10-16T13:22:00.8476761Z cache miss, executing 7089061c4edbc19f
+2026-10-16T13:22:00.8493481Z $ tsc --noEmit
+2026-10-16T13:22:00.8513171Z ##[endgroup]
+2026-10-16T13:22:05.1629895Z ##[group]@bingo/admin:typecheck
+2026-10-16T13:22:05.1630859Z cache miss, executing b7cad5f2f1aa107d
+2026-10-16T13:22:05.1646489Z $ tsc --noEmit
+2026-10-16T13:22:05.1647331Z ##[endgroup]
+2026-10-16T13:22:06.3750681Z ##[group]@bingo/web:typecheck
+2026-10-16T13:22:06.3755281Z cache miss, executing f21e23f5aab1d12e
+2026-10-16T13:22:06.3755748Z $ tsc --noEmit
+2026-10-16T13:22:06.3756301Z ##[endgroup]
+2026-10-16T13:22:06.4319295Z ##[group]@bingo/api:typecheck
+2026-10-16T13:22:06.4319930Z cache miss, executing 65749d3c0ff91041
+2026-10-16T13:22:06.4320518Z $ tsc --noEmit
+2026-10-16T13:22:06.4320979Z ##[endgroup]
+2026-10-16T13:22:06.4321206Z 
+2026-10-16T13:22:06.4321423Z  Tasks:    6 successful, 6 total
+2026-10-16T13:22:06.4321980Z Cached:    0 cached, 6 total
+2026-10-16T13:22:06.4322434Z   Time:    8.45s 
+2026-10-16T13:22:06.4322797Z 
+2026-10-16T13:22:06.4566937Z ##[group]Run pnpm test:coverage
+2026-10-16T13:22:06.4567251Z [36;1mpnpm test:coverage[0m
+2026-10-16T13:22:06.4636071Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:22:06.4636336Z env:
+2026-10-16T13:22:06.4636598Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:22:06.4636919Z ##[endgroup]
+2026-10-16T13:22:06.9150494Z $ vitest run --coverage
+2026-10-16T13:22:07.2869620Z 
+2026-10-16T13:22:07.2874047Z [1m[30m[46m RUN [49m[39m[22m [36mv5.0.4 [39m[90m/home/runner/work/bingo/bingo[39m
+2026-10-16T13:22:07.2875048Z       [2mCoverage enabled with [22m[33mv8[39m
+2026-10-16T13:22:07.2875405Z 
+2026-10-16T13:22:07.7256870Z  [32m✓[39m packages/bingo-math/src/math.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 181[2mms[22m[39m
+2026-10-16T13:22:07.9656869Z  [32m✓[39m packages/domain/src/verifier.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-16T13:22:08.5969551Z  [32m✓[39m apps/api/src/app.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 152[2mms[22m[39m
+2026-10-16T13:22:12.6902076Z  [32m✓[39m packages/domain/src/domain.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 5106[2mms[22m[39m
+2026-10-16T13:22:12.6903160Z    [32m✓[39m cartelas e padrões [2m(6)[22m
+2026-10-16T13:22:12.6904210Z      [33m[2m✓[22m[39m gera 1.000 cartelas válidas de 75[33m 757[2mms[22m[39m
+2026-10-16T13:22:12.6905192Z      [33m[2m✓[22m[39m gera 1.000 cartelas válidas de 80[33m 519[2mms[22m[39m
+2026-10-16T13:22:12.6906120Z      [33m[2m✓[22m[39m gera 1.000 cartelas válidas de 90[33m 503[2mms[22m[39m
+2026-10-16T13:22:12.6906806Z    [32m✓[39m RNG e cifra [2m(4)[22m
+2026-10-16T13:22:12.6907981Z      [33m[2m✓[22m[39m distribuição por posição em amostra fixa não apresenta desvio grosseiro[33m 3307[2mms[22m[39m
+2026-10-16T13:22:12.7255004Z 
+2026-10-16T13:22:12.7259196Z [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+2026-10-16T13:22:12.7260654Z [2m      Tests [22m [1m[32m22 passed[39m[22m[90m (22)[39m
+2026-10-16T13:22:12.7261407Z [2m   Start at [22m 13:22:07
+2026-10-16T13:22:12.7265070Z [2m   Duration [22m 5.43s[2m (tests 81%, import 14%, transform 3%, worker 2%)[22m
+2026-10-16T13:22:12.7275865Z 
+2026-10-16T13:22:12.7292448Z [34m % [39m[2mCoverage report from [22m[33mv8[39m
+2026-10-16T13:22:12.7311906Z ----------|---------|----------|---------|---------|-------------------
+2026-10-16T13:22:12.7312793Z File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+2026-10-16T13:22:12.7313608Z ----------|---------|----------|---------|---------|-------------------
+2026-10-16T13:22:12.7317196Z All files |   99.33 |    99.21 |     100 |     100 |                   
+2026-10-16T13:22:12.7319427Z  index.ts |   99.15 |     99.1 |     100 |     100 | 77                
+2026-10-16T13:22:12.7320257Z  rng.ts   |     100 |      100 |     100 |     100 |                   
+2026-10-16T13:22:12.7321164Z ----------|---------|----------|---------|---------|-------------------
+2026-10-16T13:22:12.8464838Z ##[group]Run pnpm test:integration
+2026-10-16T13:22:12.8465172Z [36;1mpnpm test:integration[0m
+2026-10-16T13:22:12.8533261Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:22:12.8533520Z env:
+2026-10-16T13:22:12.8533778Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:22:12.8534090Z ##[endgroup]
+2026-10-16T13:22:13.3552566Z $ vitest run --config vitest.integration.config.ts
+2026-10-16T13:22:13.6635925Z 
+2026-10-16T13:22:13.6639217Z [1m[30m[46m RUN [49m[39m[22m [36mv5.0.4 [39m[90m/home/runner/work/bingo/bingo[39m
+2026-10-16T13:22:13.6639898Z 
+2026-10-16T13:22:24.2118241Z  [32m✓[39m apps/api/test/platform.integration.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 9399[2mms[22m[39m
+2026-10-16T13:22:24.2119165Z    [32m✓[39m PostgreSQL real: identidade, integridade e recuperação [2m(13)[22m
+2026-10-16T13:22:24.2120255Z      [33m[2m✓[22m[39m kill real de worker durante sorteio retoma sem bola/prêmio duplicado[33m 1258[2mms[22m[39m
+2026-10-16T13:22:24.2157414Z 
+2026-10-16T13:22:24.2162493Z [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+2026-10-16T13:22:24.2163550Z [2m      Tests [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+2026-10-16T13:22:24.2164379Z [2m   Start at [22m 13:22:13
+2026-10-16T13:22:24.2168193Z [2m   Duration [22m 10.55s[2m (tests 90%, import 9%, transform 1%)[22m
+2026-10-16T13:22:24.2180823Z 
+2026-10-16T13:22:24.2720957Z ##[group]Run pnpm build
+2026-10-16T13:22:24.2721399Z [36;1mpnpm build[0m
+2026-10-16T13:22:24.2802103Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:22:24.2802493Z env:
+2026-10-16T13:22:24.2802884Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:22:24.2803358Z ##[endgroup]
+2026-10-16T13:22:24.7177260Z $ turbo build
+2026-10-16T13:22:24.7695317Z 
+2026-10-16T13:22:24.7714728Z    • Packages in scope: @bingo/admin, @bingo/api, @bingo/bingo-math, @bingo/domain, @bingo/protocol, @bingo/web
+2026-10-16T13:22:24.7715810Z    • Running build in 6 packages
+2026-10-16T13:22:24.7716361Z    • Remote caching disabled
+2026-10-16T13:22:24.7716789Z 
+2026-10-16T13:22:27.0791940Z ##[group]@bingo/protocol:build
+2026-10-16T13:22:27.0792864Z cache miss, executing 88080f7a8f325cb1
+2026-10-16T13:22:27.0793450Z $ tsc --noEmit
+2026-10-16T13:22:27.0823932Z ##[endgroup]
+2026-10-16T13:22:27.3261502Z ##[group]@bingo/bingo-math:build
+2026-10-16T13:22:27.3262384Z cache miss, executing cc2c5242e3ff0c99
+2026-10-16T13:22:27.3310997Z $ tsc --noEmit
+2026-10-16T13:22:27.3322433Z ##[endgroup]
+2026-10-16T13:22:27.5441997Z ##[group]@bingo/domain:build
+2026-10-16T13:22:27.5447573Z cache miss, executing 5806a788ca4547bd
+2026-10-16T13:22:27.5448214Z $ tsc --noEmit
+2026-10-16T13:22:27.5449134Z ##[endgroup]
+2026-10-16T13:22:35.2328097Z ##[group]@bingo/api:build
+2026-10-16T13:22:35.2328752Z cache miss, executing 0ec98ee7b61822ab
+2026-10-16T13:22:35.2329193Z $ tsc --noEmit
+2026-10-16T13:22:35.2329753Z ##[endgroup]
+2026-10-16T13:22:41.0800897Z ##[group]@bingo/admin:build
+2026-10-16T13:22:41.0801732Z cache miss, executing 406314af8394f3fd
+2026-10-16T13:22:41.0802435Z $ next build
+2026-10-16T13:22:41.0803309Z ▲ Next.js 16.4.1 (Turbopack)
+2026-10-16T13:22:41.0804086Z ✓ Running next.config.ts took 40ms
+2026-10-16T13:22:41.0805653Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+2026-10-16T13:22:41.0806919Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-10-16T13:22:41.0807870Z This information is used to shape Next.js' roadmap and prioritize features.
+2026-10-16T13:22:41.0808961Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-10-16T13:22:41.0809593Z https://nextjs.org/telemetry
+2026-10-16T13:22:41.0809771Z 
+2026-10-16T13:22:41.0809778Z 
+2026-10-16T13:22:41.0809932Z   Creating an optimized production build ...
+2026-10-16T13:22:41.0810788Z ✓ Compiled successfully in 6.9s
+2026-10-16T13:22:41.0811238Z   Running TypeScript ...
+2026-10-16T13:22:41.0812027Z   Finished TypeScript in 4.3s ...
+2026-10-16T13:22:41.0812392Z   Collecting page data using 3 workers ...
+2026-10-16T13:22:41.0812764Z   Generating static pages using 3 workers (0/3) ...
+2026-10-16T13:22:41.0813317Z ✓ Generating static pages using 3 workers (3/3) in 181ms
+2026-10-16T13:22:41.0813705Z   Finalizing page optimization ...
+2026-10-16T13:22:41.0813883Z 
+2026-10-16T13:22:41.0813991Z Route (app)
+2026-10-16T13:22:41.0814236Z ┌ ○ /
+2026-10-16T13:22:41.0814457Z └ ○ /_not-found
+2026-10-16T13:22:41.0814589Z 
+2026-10-16T13:22:41.0814595Z 
+2026-10-16T13:22:41.0814811Z ○  (Static)  prerendered as static content
+2026-10-16T13:22:41.0815021Z 
+2026-10-16T13:22:41.0815309Z ##[endgroup]
+2026-10-16T13:22:42.9090144Z ##[group]@bingo/web:build
+2026-10-16T13:22:42.9090738Z cache miss, executing a0e84170c114da32
+2026-10-16T13:22:42.9091226Z $ next build
+2026-10-16T13:22:42.9091901Z ▲ Next.js 16.4.1 (Turbopack)
+2026-10-16T13:22:42.9092422Z ✓ Running next.config.ts took 35ms
+2026-10-16T13:22:42.9093758Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+2026-10-16T13:22:42.9095070Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-10-16T13:22:42.9096096Z This information is used to shape Next.js' roadmap and prioritize features.
+2026-10-16T13:22:42.9097384Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-10-16T13:22:42.9098013Z https://nextjs.org/telemetry
+2026-10-16T13:22:42.9098202Z 
+2026-10-16T13:22:42.9098209Z 
+2026-10-16T13:22:42.9098374Z   Creating an optimized production build ...
+2026-10-16T13:22:42.9098810Z ✓ Compiled successfully in 9.0s
+2026-10-16T13:22:42.9099097Z   Running TypeScript ...
+2026-10-16T13:22:42.9099397Z   Finished TypeScript in 4.3s ...
+2026-10-16T13:22:42.9099715Z   Collecting page data using 3 workers ...
+2026-10-16T13:22:42.9100587Z   Generating static pages using 3 workers (0/3) ...
+2026-10-16T13:22:42.9101433Z ✓ Generating static pages using 3 workers (3/3) in 160ms
+2026-10-16T13:22:42.9102036Z   Finalizing page optimization ...
+2026-10-16T13:22:42.9102329Z 
+2026-10-16T13:22:42.9102428Z Route (app)
+2026-10-16T13:22:42.9102675Z ┌ ○ /
+2026-10-16T13:22:42.9102909Z └ ○ /_not-found
+2026-10-16T13:22:42.9103044Z 
+2026-10-16T13:22:42.9103050Z 
+2026-10-16T13:22:42.9103266Z ○  (Static)  prerendered as static content
+2026-10-16T13:22:42.9103475Z 
+2026-10-16T13:22:42.9103772Z ##[endgroup]
+2026-10-16T13:22:42.9115561Z 
+2026-10-16T13:22:42.9115953Z  Tasks:    6 successful, 6 total
+2026-10-16T13:22:42.9116426Z Cached:    0 cached, 6 total
+2026-10-16T13:22:42.9116815Z   Time:    18.15s 
+2026-10-16T13:22:42.9117020Z 
+2026-10-16T13:22:42.9123337Z  WARNING  no output files found for task @bingo/api#build. Please check your `outputs` key in `turbo.json`
+2026-10-16T13:22:42.9124811Z  WARNING  no output files found for task @bingo/bingo-math#build. Please check your `outputs` key in `turbo.json`
+2026-10-16T13:22:42.9126322Z  WARNING  no output files found for task @bingo/domain#build. Please check your `outputs` key in `turbo.json`
+2026-10-16T13:22:42.9127732Z  WARNING  no output files found for task @bingo/protocol#build. Please check your `outputs` key in `turbo.json`
+2026-10-16T13:22:42.9847882Z ##[group]Run pnpm exec playwright install --with-deps chromium
+2026-10-16T13:22:42.9848626Z [36;1mpnpm exec playwright install --with-deps chromium[0m
+2026-10-16T13:22:42.9933990Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:22:42.9934435Z env:
+2026-10-16T13:22:42.9934717Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:22:42.9935044Z ##[endgroup]
+2026-10-16T13:22:43.9209968Z Installing dependencies...
+2026-10-16T13:22:43.9290525Z Switching to root user to install dependencies...
+2026-10-16T13:22:44.0131271Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-16T13:22:44.0603640Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-10-16T13:22:44.0605413Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-10-16T13:22:44.0616053Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-10-16T13:22:44.0695555Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-10-16T13:22:44.0720262Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-10-16T13:22:44.2691907Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [12.4 kB]
+2026-10-16T13:22:44.2855358Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [523 kB]
+2026-10-16T13:22:44.2952012Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [581 kB]
+2026-10-16T13:22:44.3198668Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1397 kB]
+2026-10-16T13:22:44.3277064Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [308 kB]
+2026-10-16T13:22:44.3301774Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1704 kB]
+2026-10-16T13:22:44.3409728Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [342 kB]
+2026-10-16T13:22:44.3431488Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1805 kB]
+2026-10-16T13:22:44.3511416Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [411 kB]
+2026-10-16T13:22:44.4330776Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1144 kB]
+2026-10-16T13:22:44.4401292Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [231 kB]
+2026-10-16T13:22:44.4431817Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1222 kB]
+2026-10-16T13:22:44.4485638Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [246 kB]
+2026-10-16T13:22:44.4949533Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1713 kB]
+2026-10-16T13:22:44.5045069Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [392 kB]
+2026-10-16T13:22:48.0119038Z Fetched 12.4 MB in 1s (8770 kB/s)
+2026-10-16T13:22:48.8872080Z Reading package lists...
+2026-10-16T13:22:48.9129527Z Reading package lists...
+2026-10-16T13:22:49.1463949Z Building dependency tree...
+2026-10-16T13:22:49.1473547Z Reading state information...
+2026-10-16T13:22:49.3209503Z libasound2t64 is already the newest version (1.2.11-1ubuntu0.3).
+2026-10-16T13:22:49.3210526Z libasound2t64 set to manually installed.
+2026-10-16T13:22:49.3211060Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-16T13:22:49.3211520Z libatk-bridge2.0-0t64 set to manually installed.
+2026-10-16T13:22:49.3211955Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-16T13:22:49.3212352Z libatk1.0-0t64 set to manually installed.
+2026-10-16T13:22:49.3212764Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-16T13:22:49.3213202Z libatspi2.0-0t64 set to manually installed.
+2026-10-16T13:22:49.3213603Z libcairo2 is already the newest version (1.18.0-3build1).
+2026-10-16T13:22:49.3213988Z libcairo2 set to manually installed.
+2026-10-16T13:22:49.3214963Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.14).
+2026-10-16T13:22:49.3215514Z libcups2t64 set to manually installed.
+2026-10-16T13:22:49.3216187Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+2026-10-16T13:22:49.3216818Z libdbus-1-3 set to manually installed.
+2026-10-16T13:22:49.3217491Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.2).
+2026-10-16T13:22:49.3218127Z libdrm2 set to manually installed.
+2026-10-16T13:22:49.3218766Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.4).
+2026-10-16T13:22:49.3219382Z libgbm1 set to manually installed.
+2026-10-16T13:22:49.3219920Z libglib2.0-0t64 is already the newest version (2.80.0-6ubuntu3.9).
+2026-10-16T13:22:49.3220666Z libglib2.0-0t64 set to manually installed.
+2026-10-16T13:22:49.3221083Z libnspr4 is already the newest version (2:4.35-1.1build1).
+2026-10-16T13:22:49.3221466Z libnspr4 set to manually installed.
+2026-10-16T13:22:49.3221868Z libnss3 is already the newest version (2:3.98-1ubuntu0.2).
+2026-10-16T13:22:49.3222230Z libnss3 set to manually installed.
+2026-10-16T13:22:49.3222633Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+2026-10-16T13:22:49.3223036Z libpango-1.0-0 set to manually installed.
+2026-10-16T13:22:49.3223436Z libx11-6 is already the newest version (2:1.8.7-1ubuntu0.1).
+2026-10-16T13:22:49.3223809Z libx11-6 set to manually installed.
+2026-10-16T13:22:49.3224176Z libxcb1 is already the newest version (1.15-1ubuntu2).
+2026-10-16T13:22:49.3224530Z libxcb1 set to manually installed.
+2026-10-16T13:22:49.3224929Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+2026-10-16T13:22:49.3225332Z libxcomposite1 set to manually installed.
+2026-10-16T13:22:49.3225738Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+2026-10-16T13:22:49.3226124Z libxdamage1 set to manually installed.
+2026-10-16T13:22:49.3226514Z libxext6 is already the newest version (2:1.3.4-1build2).
+2026-10-16T13:22:49.3226868Z libxext6 set to manually installed.
+2026-10-16T13:22:49.3227255Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+2026-10-16T13:22:49.3227630Z libxfixes3 set to manually installed.
+2026-10-16T13:22:49.3228015Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+2026-10-16T13:22:49.3228394Z libxkbcommon0 set to manually installed.
+2026-10-16T13:22:49.3228790Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+2026-10-16T13:22:49.3229151Z libxrandr2 set to manually installed.
+2026-10-16T13:22:49.3229527Z xvfb is already the newest version (2:21.1.12-1ubuntu1.8).
+2026-10-16T13:22:49.3230156Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+2026-10-16T13:22:49.3230709Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+2026-10-16T13:22:49.3231120Z libfontconfig1 set to manually installed.
+2026-10-16T13:22:49.3231557Z libfreetype6 is already the newest version (2.13.2+dfsg-1ubuntu0.2).
+2026-10-16T13:22:49.3231973Z libfreetype6 set to manually installed.
+2026-10-16T13:22:49.3232403Z fonts-liberation is already the newest version (1:2.1.5-3).
+2026-10-16T13:22:49.3232825Z fonts-liberation set to manually installed.
+2026-10-16T13:22:49.3233225Z The following additional packages will be installed:
+2026-10-16T13:22:49.3233587Z   xfonts-encodings xfonts-utils
+2026-10-16T13:22:49.3233868Z Recommended packages:
+2026-10-16T13:22:49.3234145Z   fonts-ipafont-mincho fonts-tlwg-loma
+2026-10-16T13:22:49.3403526Z The following NEW packages will be installed:
+2026-10-16T13:22:49.3404348Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+2026-10-16T13:22:49.3410314Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+2026-10-16T13:22:49.3410900Z   xfonts-utils
+2026-10-16T13:22:49.3617056Z 0 upgraded, 9 newly installed, 0 to remove and 44 not upgraded.
+2026-10-16T13:22:49.3617791Z Need to get 21.1 MB of archives.
+2026-10-16T13:22:49.3618392Z After this operation, 79.5 MB of additional disk space will be used.
+2026-10-16T13:22:49.3619344Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-16T13:22:49.4373713Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+2026-10-16T13:22:49.6922138Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+2026-10-16T13:22:49.8337110Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+2026-10-16T13:22:49.8631738Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+2026-10-16T13:22:49.9836313Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+2026-10-16T13:22:50.2232691Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+2026-10-16T13:22:50.2523103Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+2026-10-16T13:22:50.2777711Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+2026-10-16T13:22:50.3212939Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+2026-10-16T13:22:50.5953127Z Fetched 21.1 MB in 1s (21.5 MB/s)
+2026-10-16T13:22:50.6169940Z Selecting previously unselected package fonts-ipafont-gothic.
+2026-10-16T13:22:50.6390896Z (Reading database ... 
+2026-10-16T13:22:50.6391368Z (Reading database ... 5%
+2026-10-16T13:22:50.6391731Z (Reading database ... 10%
+2026-10-16T13:22:50.6392089Z (Reading database ... 15%
+2026-10-16T13:22:50.6392344Z (Reading database ... 20%
+2026-10-16T13:22:50.6392594Z (Reading database ... 25%
+2026-10-16T13:22:50.6392872Z (Reading database ... 30%
+2026-10-16T13:22:50.6393110Z (Reading database ... 35%
+2026-10-16T13:22:50.6393352Z (Reading database ... 40%
+2026-10-16T13:22:50.6393585Z (Reading database ... 45%
+2026-10-16T13:22:50.6393831Z (Reading database ... 50%
+2026-10-16T13:22:50.6425163Z (Reading database ... 55%
+2026-10-16T13:22:50.7425205Z (Reading database ... 60%
+2026-10-16T13:22:50.9487770Z (Reading database ... 65%
+2026-10-16T13:22:51.1519318Z (Reading database ... 70%
+2026-10-16T13:22:51.3532135Z (Reading database ... 75%
+2026-10-16T13:22:51.4979732Z (Reading database ... 80%
+2026-10-16T13:22:51.6976016Z (Reading database ... 85%
+2026-10-16T13:22:51.8522037Z (Reading database ... 90%
+2026-10-16T13:22:52.0102758Z (Reading database ... 95%
+2026-10-16T13:22:52.0103256Z (Reading database ... 100%
+2026-10-16T13:22:52.0103914Z (Reading database ... 203540 files and directories currently installed.)
+2026-10-16T13:22:52.0149754Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+2026-10-16T13:22:52.0250351Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-16T13:22:52.2625013Z Selecting previously unselected package fonts-freefont-ttf.
+2026-10-16T13:22:52.2763902Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+2026-10-16T13:22:52.2769844Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-16T13:22:52.3627380Z Selecting previously unselected package fonts-tlwg-loma-otf.
+2026-10-16T13:22:52.3760594Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+2026-10-16T13:22:52.3766584Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-16T13:22:52.3974480Z Selecting previously unselected package fonts-unifont.
+2026-10-16T13:22:52.4105515Z Preparing to unpack .../3-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+2026-10-16T13:22:52.4111713Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+2026-10-16T13:22:52.5252846Z Selecting previously unselected package fonts-wqy-zenhei.
+2026-10-16T13:22:52.5385542Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+2026-10-16T13:22:52.5490451Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-16T13:22:53.0207227Z Selecting previously unselected package xfonts-encodings.
+2026-10-16T13:22:53.0341748Z Preparing to unpack .../5-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+2026-10-16T13:22:53.0347272Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-16T13:22:53.0632101Z Selecting previously unselected package xfonts-utils.
+2026-10-16T13:22:53.0763696Z Preparing to unpack .../6-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+2026-10-16T13:22:53.0769146Z Unpacking xfonts-utils (1:7.7+6build3) ...
+2026-10-16T13:22:53.1135212Z Selecting previously unselected package xfonts-cyrillic.
+2026-10-16T13:22:53.1267476Z Preparing to unpack .../7-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+2026-10-16T13:22:53.1273964Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-16T13:22:53.1597946Z Selecting previously unselected package xfonts-scalable.
+2026-10-16T13:22:53.1728589Z Preparing to unpack .../8-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+2026-10-16T13:22:53.1734616Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-16T13:22:53.2183812Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-16T13:22:53.2295161Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-16T13:22:53.2308412Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-16T13:22:53.2322081Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-16T13:22:53.2336078Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-16T13:22:53.2402406Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+2026-10-16T13:22:53.2415598Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+2026-10-16T13:22:53.2429647Z Setting up xfonts-utils (1:7.7+6build3) ...
+2026-10-16T13:22:53.2467619Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-16T13:22:53.2825096Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-16T13:22:53.3171715Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-10-16T13:22:53.3191163Z Not building database; man-db/auto-update is not 'true'.
+2026-10-16T13:22:53.3205207Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+2026-10-16T13:22:54.2796306Z 
+2026-10-16T13:22:54.2796956Z Running kernel seems to be up-to-date.
+2026-10-16T13:22:54.2797323Z 
+2026-10-16T13:22:54.2797560Z No services need to be restarted.
+2026-10-16T13:22:54.2797844Z 
+2026-10-16T13:22:54.2798058Z No containers need to be restarted.
+2026-10-16T13:22:54.2798337Z 
+2026-10-16T13:22:54.2798626Z No user sessions are running outdated binaries.
+2026-10-16T13:22:54.2798939Z 
+2026-10-16T13:22:54.2799372Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-16T13:22:55.3034904Z Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/linux64/chrome-linux64.zip
+2026-10-16T13:22:55.7490272Z |                                                                                |   0% of 191.1 MiB
+2026-10-16T13:22:55.9254289Z |■■■■■■■■                                                                        |  10% of 191.1 MiB
+2026-10-16T13:22:56.1175369Z |■■■■■■■■■■■■■■■■                                                                |  20% of 191.1 MiB
+2026-10-16T13:22:56.2655215Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 191.1 MiB
+2026-10-16T13:22:56.3783129Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 191.1 MiB
+2026-10-16T13:22:56.4954554Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 191.1 MiB
+2026-10-16T13:22:56.6072457Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 191.1 MiB
+2026-10-16T13:22:56.7411414Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 191.1 MiB
+2026-10-16T13:22:56.8519783Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 191.1 MiB
+2026-10-16T13:22:56.9584289Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 191.1 MiB
+2026-10-16T13:22:57.1567369Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 191.1 MiB
+2026-10-16T13:23:00.2895973Z Chrome for Testing 156.0.8078.4 (playwright chromium v1248) downloaded to /home/runner/.cache/ms-playwright/chromium-1248
+2026-10-16T13:23:00.2901204Z Downloading FFmpeg (playwright ffmpeg v1013) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1013/ffmpeg-linux.zip
+2026-10-16T13:23:00.7575205Z |                                                                                |   0% of 2.2 MiB
+2026-10-16T13:23:00.7620610Z |■■■■■■■■                                                                        |  10% of 2.2 MiB
+2026-10-16T13:23:00.7666304Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.2 MiB
+2026-10-16T13:23:00.7696360Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.2 MiB
+2026-10-16T13:23:00.7756847Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.2 MiB
+2026-10-16T13:23:00.7773428Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.2 MiB
+2026-10-16T13:23:00.7788471Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.2 MiB
+2026-10-16T13:23:00.7808641Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.2 MiB
+2026-10-16T13:23:00.7828533Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.2 MiB
+2026-10-16T13:23:00.7845559Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.2 MiB
+2026-10-16T13:23:00.7862682Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.2 MiB
+2026-10-16T13:23:00.8456659Z FFmpeg (playwright ffmpeg v1013) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1013
+2026-10-16T13:23:00.8459600Z Downloading Chrome Headless Shell 156.0.8078.4 (playwright chromium-headless-shell v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/linux64/chrome-headless-shell-linux64.zip
+2026-10-16T13:23:01.2422334Z |                                                                                |   0% of 120 MiB
+2026-10-16T13:23:01.3988412Z |■■■■■■■■                                                                        |  10% of 120 MiB
+2026-10-16T13:23:01.5015679Z |■■■■■■■■■■■■■■■■                                                                |  20% of 120 MiB
+2026-10-16T13:23:01.7661502Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 120 MiB
+2026-10-16T13:23:01.8893132Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 120 MiB
+2026-10-16T13:23:01.9933891Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 120 MiB
+2026-10-16T13:23:02.0908435Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 120 MiB
+2026-10-16T13:23:02.1955445Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 120 MiB
+2026-10-16T13:23:02.2782414Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 120 MiB
+2026-10-16T13:23:02.3589428Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 120 MiB
+2026-10-16T13:23:02.4341439Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 120 MiB
+2026-10-16T13:23:04.7126834Z Chrome Headless Shell 156.0.8078.4 (playwright chromium-headless-shell v1248) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1248
+2026-10-16T13:23:04.7521341Z ##[group]Run pnpm test:e2e
+2026-10-16T13:23:04.7522176Z [36;1mpnpm test:e2e[0m
+2026-10-16T13:23:04.7591972Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:23:04.7592247Z env:
+2026-10-16T13:23:04.7592519Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:23:04.7592839Z ##[endgroup]
+2026-10-16T13:23:05.1938631Z $ playwright test
+2026-10-16T13:23:06.2997686Z [WebServer] $ next dev --hostname 0.0.0.0 --port 3000
+2026-10-16T13:23:11.0045426Z [WebServer] $ next dev --hostname 0.0.0.0 --port 3001
+2026-10-16T13:23:14.5643017Z 
+2026-10-16T13:23:14.5643712Z Running 4 tests using 1 worker
+2026-10-16T13:23:14.5646509Z 
+2026-10-16T13:23:18.1274937Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1275821Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1276310Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1276762Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1277350Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1277828Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1278289Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1278653Z [WebServer] }
+2026-10-16T13:23:18.1311475Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1312663Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1313410Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1314122Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1314888Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1315606Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1340655Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1345914Z [WebServer] }
+2026-10-16T13:23:18.1431655Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/rooms Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1450824Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1486081Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1512195Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1561109Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1590990Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1591809Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1621008Z [WebServer] }
+2026-10-16T13:23:18.1651074Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1680897Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1681744Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1710867Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1746914Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1800968Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1823093Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1827844Z [WebServer] }
+2026-10-16T13:23:18.1828892Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1829909Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1830772Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1831423Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1832057Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1833200Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1833782Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1834272Z [WebServer] }
+2026-10-16T13:23:18.1834910Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1835683Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1836293Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1836882Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1837510Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1838124Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1838697Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1839187Z [WebServer] }
+2026-10-16T13:23:18.1840350Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/rooms Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1841275Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1841875Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1842796Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1843448Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1844130Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1844780Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1845305Z [WebServer] }
+2026-10-16T13:23:18.1845981Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:18.1846758Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:18.1847374Z [WebServer]   errno: -111,
+2026-10-16T13:23:18.1847989Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:18.1848626Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:18.1849256Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:18.1849851Z [WebServer]   port: 4000
+2026-10-16T13:23:18.1850612Z [WebServer] }
+2026-10-16T13:23:19.4705007Z   ✓  1 [desktop] › tests/e2e/interface.spec.ts:2:1 › lobby acessível, sem contadores inventados e sem transbordar no celular (2.9s)
+2026-10-16T13:23:20.0463709Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:20.0464343Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:20.0464702Z [WebServer]   errno: -111,
+2026-10-16T13:23:20.0465020Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:20.0465349Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:20.0465661Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:20.0465934Z [WebServer]   port: 4000
+2026-10-16T13:23:20.0466198Z [WebServer] }
+2026-10-16T13:23:20.0481435Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:20.0482793Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:20.0483593Z [WebServer]   errno: -111,
+2026-10-16T13:23:20.0484391Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:20.0484940Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:20.0487138Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:20.0487594Z [WebServer]   port: 4000
+2026-10-16T13:23:20.0487920Z [WebServer] }
+2026-10-16T13:23:20.0596102Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:20.0631204Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:20.0641596Z [WebServer]   errno: -111,
+2026-10-16T13:23:20.0642359Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:20.0643355Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:20.0644872Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:20.0645566Z [WebServer]   port: 4000
+2026-10-16T13:23:20.0646116Z [WebServer] }
+2026-10-16T13:23:20.0646810Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:20.0647612Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:20.0648291Z [WebServer]   errno: -111,
+2026-10-16T13:23:20.0648932Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:20.0649615Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:20.0650434Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:20.0651285Z [WebServer]   port: 4000
+2026-10-16T13:23:20.0661098Z [WebServer] }
+2026-10-16T13:23:20.2392878Z   ✓  2 [desktop] › tests/e2e/interface.spec.ts:25:1 › admin exige autenticação e mantém demonstração visível (742ms)
+2026-10-16T13:23:21.8395678Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8396592Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8397079Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8397562Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8398034Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8398489Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8398906Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8399254Z [WebServer] }
+2026-10-16T13:23:21.8403083Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8403725Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8404218Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8404685Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8405178Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8406180Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8406635Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8407002Z [WebServer] }
+2026-10-16T13:23:21.8475285Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/rooms Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8476220Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8476720Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8477193Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8477685Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8478173Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8478626Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8478995Z [WebServer] }
+2026-10-16T13:23:21.8541304Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8553196Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8565424Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8567153Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8567890Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8568632Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8569256Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8569806Z [WebServer] }
+2026-10-16T13:23:21.8669110Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8670486Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8671455Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8672218Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8672905Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8676387Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8677531Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8678140Z [WebServer] }
+2026-10-16T13:23:21.8702790Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8704442Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8705220Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8705903Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8706620Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8707359Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8708063Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8708638Z [WebServer] }
+2026-10-16T13:23:21.8738733Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/rooms Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8740906Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8741663Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8742357Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8743078Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8743813Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8746104Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8746692Z [WebServer] }
+2026-10-16T13:23:21.8786231Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:21.8801252Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:21.8814080Z [WebServer]   errno: -111,
+2026-10-16T13:23:21.8817933Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:21.8818749Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:21.8819460Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:21.8820657Z [WebServer]   port: 4000
+2026-10-16T13:23:21.8821176Z [WebServer] }
+2026-10-16T13:23:23.3835884Z   ✓  3 [mobile] › tests/e2e/interface.spec.ts:2:1 › lobby acessível, sem contadores inventados e sem transbordar no celular (2.4s)
+2026-10-16T13:23:23.9619608Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:23.9652919Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:23.9662110Z [WebServer]   errno: -111,
+2026-10-16T13:23:23.9721441Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:23.9732930Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:23.9741356Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:23.9742094Z [WebServer]   port: 4000
+2026-10-16T13:23:23.9746591Z [WebServer] }
+2026-10-16T13:23:23.9747772Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:23.9748969Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:23.9749738Z [WebServer]   errno: -111,
+2026-10-16T13:23:23.9750663Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:23.9751298Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:23.9752016Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:23.9752722Z [WebServer]   port: 4000
+2026-10-16T13:23:23.9753260Z [WebServer] }
+2026-10-16T13:23:23.9781501Z [WebServer] Failed to proxy http://127.0.0.1:4000/v1/me Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:23.9791414Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:23.9796002Z [WebServer]   errno: -111,
+2026-10-16T13:23:23.9796774Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:23.9797521Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:23.9798225Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:23.9798845Z [WebServer]   port: 4000
+2026-10-16T13:23:23.9799361Z [WebServer] }
+2026-10-16T13:23:23.9800258Z [WebServer] Error: connect ECONNREFUSED 127.0.0.1:4000
+2026-10-16T13:23:23.9801318Z [WebServer]     at ignore-listed frames {
+2026-10-16T13:23:23.9802014Z [WebServer]   errno: -111,
+2026-10-16T13:23:23.9802698Z [WebServer]   code: 'ECONNREFUSED',
+2026-10-16T13:23:23.9803407Z [WebServer]   syscall: 'connect',
+2026-10-16T13:23:23.9804145Z [WebServer]   address: '127.0.0.1',
+2026-10-16T13:23:23.9804802Z [WebServer]   port: 4000
+2026-10-16T13:23:23.9805335Z [WebServer] }
+2026-10-16T13:23:24.2951773Z   ✓  4 [mobile] › tests/e2e/interface.spec.ts:25:1 › admin exige autenticação e mantém demonstração visível (877ms)
+2026-10-16T13:23:24.4398083Z 
+2026-10-16T13:23:24.4403114Z   4 passed (18.6s)
+2026-10-16T13:23:24.4918239Z ##[group]Run pnpm audit --audit-level critical
+2026-10-16T13:23:24.4918649Z [36;1mpnpm audit --audit-level critical[0m
+2026-10-16T13:23:24.4987059Z shell: /usr/bin/bash -e {0}
+2026-10-16T13:23:24.4987320Z env:
+2026-10-16T13:23:24.4987591Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:23:24.4987910Z ##[endgroup]
+2026-10-16T13:23:25.1279308Z No known vulnerabilities found
+2026-10-16T13:23:25.1483452Z ##[group]Run actions/upload-artifact@v4
+2026-10-16T13:23:25.1483769Z with:
+2026-10-16T13:23:25.1483992Z   name: verification-evidence
+2026-10-16T13:23:25.1484298Z   path: coverage
+playwright-report
+test-results
+
+2026-10-16T13:23:25.1484624Z   if-no-files-found: warn
+2026-10-16T13:23:25.1484862Z   compression-level: 6
+2026-10-16T13:23:25.1485082Z   overwrite: false
+2026-10-16T13:23:25.1485306Z   include-hidden-files: false
+2026-10-16T13:23:25.1485541Z env:
+2026-10-16T13:23:25.1485784Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-16T13:23:25.1486086Z ##[endgroup]
+2026-10-16T13:23:25.3135485Z (node:5865) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-16T13:23:25.3136312Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-16T13:23:25.3232636Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-16T13:23:25.3234878Z The least common ancestor is /home/runner/work/bingo/bingo. This will be the root directory of the artifact
+2026-10-16T13:23:25.3236194Z With the provided path, there will be 19 files uploaded
+2026-10-16T13:23:25.3241038Z Artifact name is valid!
+2026-10-16T13:23:25.3241514Z Root directory input is valid!
+2026-10-16T13:23:25.6044248Z Beginning upload of artifact content to blob storage
+2026-10-16T13:23:25.7239115Z (node:5865) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-16T13:23:26.0792412Z Uploaded bytes 2031068
+2026-10-16T13:23:26.1204554Z Finished uploading artifact content to blob storage!
+2026-10-16T13:23:26.1205922Z SHA256 digest of uploaded artifact zip is 1aa2b2fd80d6ab9e9a18f00506427b0c131e0297190288c3e1655861ae98a158
+2026-10-16T13:23:26.1206928Z Finalizing artifact upload
+2026-10-16T13:23:26.3553303Z Artifact verification-evidence.zip successfully finalized. Artifact ID 12048264307
+2026-10-16T13:23:26.3554247Z Artifact verification-evidence has been successfully uploaded! Final size is 2031068 bytes. Artifact ID is 12048264307
+2026-10-16T13:23:26.3560219Z Artifact download URL: https://github.com/betwenes-ops/bingo/actions/runs/38907232218/artifacts/12048264307
+2026-10-16T13:23:26.3753915Z Post job cleanup.
+2026-10-16T13:23:26.5004165Z (node:5877) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-16T13:23:26.5005013Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-16T13:23:26.5213498Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/bingo/bingo --files-from manifest.txt --use-compress-program zstdmt
+2026-10-16T13:23:28.8072958Z (node:5877) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-16T13:23:29.7952954Z Sent 0 of 257575682 (0.0%), 0.0 MBs/sec
+2026-10-16T13:23:30.4392602Z Sent 257575682 of 257575682 (100.0%), 149.3 MBs/sec
+2026-10-16T13:23:30.8678118Z Cache saved with the key: node-cache-Linux-x64-pnpm-c987c9d185a56b2e0a5b63941ff1af54156980704868a62f8ff91c9d225cc835
+2026-10-16T13:23:30.8944143Z Post job cleanup.
+2026-10-16T13:23:31.0426676Z Pruning is unnecessary.
+2026-10-16T13:23:31.1267341Z Post job cleanup.
+2026-10-16T13:23:31.2165496Z [command]/usr/bin/git version
+2026-10-16T13:23:31.2211605Z git version 2.55.0
+2026-10-16T13:23:31.2252505Z Temporarily overriding HOME='/home/runner/work/_temp/b85d8ed9-b9f3-482d-88e9-461b8b330070' before making global git config changes
+2026-10-16T13:23:31.2253843Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T13:23:31.2258375Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bingo/bingo
+2026-10-16T13:23:31.2302709Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T13:23:31.2342408Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T13:23:31.2609216Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T13:23:31.2637517Z http.https://github.com/.extraheader
+2026-10-16T13:23:31.2650122Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-16T13:23:31.4468206Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T13:23:31.4718356Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T13:23:31.4758786Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T13:23:31.5150931Z Cleaning up orphan processes
+2026-10-16T13:23:31.5522236Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4, pnpm/action-setup@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

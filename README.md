@@ -53,7 +53,7 @@ pnpm test:e2e
 pnpm --filter @bingo/api exec node --import tsx ../../scripts/simulate.ts
 ```
 
-Integração usa Testcontainers com PostgreSQL 16 real e requer Docker, ou `TEST_DATABASE_URL` apontando para um banco descartável vazio. O teste de recuperação inicia e mata um processo real. Nunca direcione testes a um banco de usuários reais. E2E de interface não substitui o fluxo de jogo; o CI configura integração separadamente.
+Integração usa Testcontainers com PostgreSQL 16 real e requer Docker, ou `TEST_DATABASE_URL` apontando para um banco descartável vazio. O teste de recuperação inicia e mata um processo real. Nunca direcione testes a um banco de usuários reais. O CI também habilita o fluxo de jogo pelo navegador contra PostgreSQL/API reais; localmente, esse teste requer E2E_DATABASE_URL e a stack iniciada. O smoke visual isolado não substitui esse fluxo.
 
 ## Implementado e limites atuais
 

@@ -5,9 +5,9 @@ $ vitest run --coverage
 
 
  Test Files  4 passed (4)
-      Tests  22 passed (22)
-   Start at  08:16:59
-   Duration  7.78s (tests 86%, import 10%, transform 2%, worker 1%)
+      Tests  23 passed (23)
+   Start at  08:24:10
+   Duration  7.44s (tests 75%, import 18%, transform 5%, worker 2%)
 
  % Coverage report from v8
 ----------|---------|----------|---------|---------|-------------------

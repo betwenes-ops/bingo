@@ -36,11 +36,13 @@ export default defineConfig({
     : [
         {
           command: 'pnpm --filter @bingo/web dev',
+          env: { NODE_ENV: 'development' },
           url: 'http://localhost:3000',
           reuseExistingServer: !process.env.CI,
         },
         {
           command: 'pnpm --filter @bingo/admin dev',
+          env: { NODE_ENV: 'development' },
           url: 'http://localhost:3001',
           reuseExistingServer: !process.env.CI,
         },

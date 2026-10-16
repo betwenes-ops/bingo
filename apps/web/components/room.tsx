@@ -172,7 +172,9 @@ export function Room({
               <div className="main-ball" key={latest ?? 'waiting'}>
                 <small>
                   {latest
-                    ? (['B', 'I', 'N', 'G', 'O'][Math.floor((latest - 1) / 15)] ?? 'BINGO')
+                    ? r.variant === 75
+                      ? (['B', 'I', 'N', 'G', 'O'][Math.floor((latest - 1) / 15)] ?? 'BINGO')
+                      : 'BOLA'
                     : 'BINGO'}
                 </small>
                 <strong>{latest ?? '—'}</strong>

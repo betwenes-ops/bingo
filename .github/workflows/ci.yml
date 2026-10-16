@@ -9,6 +9,28 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bingo
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: bingo_e2e
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U bingo -d bingo_e2e"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://bingo:test-only-password@127.0.0.1:5432/bingo_e2e
+      E2E_DATABASE_URL: postgresql://bingo:test-only-password@127.0.0.1:5432/bingo_e2e
+      REDIS_URL: redis://127.0.0.1:6379
+      SEED_ENCRYPTION_KEY: '1313131313131313131313131313131313131313131313131313131313131313'
+      TURNSTILE_BYPASS: 'true'
+      REAL_MONEY_ENABLED: 'false'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -24,8 +46,18 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:coverage
       - run: pnpm test:integration
-      - run: pnpm build
+      - run: NODE_ENV=production pnpm build
       - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm db:migrate
+      - name: Start E2E API
+        run: |
+          pnpm --filter @bingo/api start > /tmp/bingo-api.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail http://localhost:4000/ready; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/bingo-api.log
+          exit 1
       - run: pnpm test:e2e
       - run: pnpm audit --audit-level critical
       - uses: actions/upload-artifact@v4

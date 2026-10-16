@@ -7,36 +7,34 @@ $ turbo build
 
  WARNING  failed to get git status for dirty hash: Git error: fatal: not a git repository (or any of the parent directories): .git
 
-@bingo/domain:build: cache miss, executing 4b32f2a1f2d7b549
-@bingo/protocol:build: cache miss, executing 5ed2960de997fe79
-@bingo/bingo-math:build: cache miss, executing 06e2c37d8db41b87
-@bingo/protocol:build: $ tsc --noEmit
+@bingo/bingo-math:build: cache hit, replaying logs cc2c5242e3ff0c99
 @bingo/bingo-math:build: $ tsc --noEmit
+@bingo/protocol:build: cache hit, replaying logs 88080f7a8f325cb1
+@bingo/protocol:build: $ tsc --noEmit
+@bingo/domain:build: cache miss, executing 2a97412753e4d7da
+@bingo/admin:build: cache miss, executing 08c76fab215f76a6
 @bingo/domain:build: $ tsc --noEmit
-@bingo/web:build: cache miss, executing ad1c3db3881e4fc0
-@bingo/admin:build: cache miss, executing 5cff9317e1b6908f
-@bingo/api:build: cache miss, executing 34d5179c7e4af74d
-@bingo/web:build: $ next build
-@bingo/api:build: $ tsc --noEmit
 @bingo/admin:build: $ next build
-@bingo/web:build: ▲ Next.js 16.4.1 (Turbopack)
-@bingo/web:build: ✓ Running next.config.ts took 31ms
-@bingo/web:build: 
-@bingo/web:build:   Creating an optimized production build ...
 @bingo/admin:build: ▲ Next.js 16.4.1 (Turbopack)
-@bingo/admin:build: ✓ Running next.config.ts took 55ms
+@bingo/admin:build: ✓ Running next.config.ts took 35ms
 @bingo/admin:build: 
 @bingo/admin:build:   Creating an optimized production build ...
-@bingo/admin:build: ✓ Compiled successfully in 1696ms
+@bingo/admin:build: ✓ Compiled successfully in 681ms
 @bingo/admin:build:   Running TypeScript ...
-@bingo/web:build: ✓ Compiled successfully in 3.0s
-@bingo/web:build:   Running TypeScript ...
-@bingo/admin:build:   Finished TypeScript in 4.9s ...
+@bingo/api:build: cache miss, executing d7f61ba997f4519f
+@bingo/web:build: cache miss, executing e835bb711b0eac18
+@bingo/web:build: $ next build
+@bingo/api:build: $ tsc --noEmit
+@bingo/web:build: ▲ Next.js 16.4.1 (Turbopack)
+@bingo/web:build: ✓ Running next.config.ts took 40ms
+@bingo/web:build: 
+@bingo/web:build:   Creating an optimized production build ...
+@bingo/admin:build:   Finished TypeScript in 2.3s ...
 @bingo/admin:build:   Collecting page data using 4 workers ...
 @bingo/admin:build:   Generating static pages using 4 workers (0/3) ...
-@bingo/web:build:   Finished TypeScript in 5.0s ...
-@bingo/web:build:   Collecting page data using 4 workers ...
-@bingo/admin:build: ✓ Generating static pages using 4 workers (3/3) in 760ms
+@bingo/web:build: ✓ Compiled successfully in 2.0s
+@bingo/web:build:   Running TypeScript ...
+@bingo/admin:build: ✓ Generating static pages using 4 workers (3/3) in 811ms
 @bingo/admin:build:   Finalizing page optimization ...
 @bingo/admin:build: 
 @bingo/admin:build: Route (app)
@@ -46,8 +44,10 @@ $ turbo build
 @bingo/admin:build: 
 @bingo/admin:build: ○  (Static)  prerendered as static content
 @bingo/admin:build: 
+@bingo/web:build:   Finished TypeScript in 3.5s ...
+@bingo/web:build:   Collecting page data using 4 workers ...
 @bingo/web:build:   Generating static pages using 4 workers (0/3) ...
-@bingo/web:build: ✓ Generating static pages using 4 workers (3/3) in 795ms
+@bingo/web:build: ✓ Generating static pages using 4 workers (3/3) in 702ms
 @bingo/web:build:   Finalizing page optimization ...
 @bingo/web:build: 
 @bingo/web:build: Route (app)
@@ -59,10 +59,8 @@ $ turbo build
 @bingo/web:build: 
 
  Tasks:    6 successful, 6 total
-Cached:    0 cached, 6 total
-  Time:    15.054s 
+Cached:    2 cached, 6 total
+  Time:    11.225s 
 
  WARNING  no output files found for task @bingo/api#build. Please check your `outputs` key in `turbo.json`
- WARNING  no output files found for task @bingo/bingo-math#build. Please check your `outputs` key in `turbo.json`
  WARNING  no output files found for task @bingo/domain#build. Please check your `outputs` key in `turbo.json`
- WARNING  no output files found for task @bingo/protocol#build. Please check your `outputs` key in `turbo.json`

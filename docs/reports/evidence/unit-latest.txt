@@ -1,0 +1,10 @@
+$ vitest run
+
+ RUN  v5.0.4 /workspace/scratch/ed29892562f0/bingo
+
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  08:20:54
+   Duration  8.05s (tests 68%, import 26%, transform 5%)
+

@@ -14,6 +14,7 @@ test('lobby acessível, sem contadores inventados e sem transbordar no celular',
   await page.screenshot({
     path: `test-results/lobby-${test.info().project.name}.png`,
     fullPage: true,
+    scale: 'css',
   });
   await page.getByRole('button', { name: 'Entrar', exact: false }).first().click();
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -33,5 +34,6 @@ test('admin exige autenticação e mantém demonstração visível', async ({ pa
   await page.screenshot({
     path: `test-results/admin-${test.info().project.name}.png`,
     fullPage: true,
+    scale: 'css',
   });
 });
