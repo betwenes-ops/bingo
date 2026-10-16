@@ -95,3 +95,10 @@ it('limite de login/cadastro retorna 429 em vez de erro interno', async () => {
   expect(status).toBe(429);
   expect(code).toBe('RATE_LIMITED');
 });
+
+it('configuração pública informa ausência de CAPTCHA sem expor segredos', async () => {
+  const response = await app.inject({ url: '/v1/auth/config' });
+  expect(response.statusCode).toBe(200);
+  expect(response.json()).toEqual({ required: true, siteKey: null, ready: false });
+  expect(response.body).not.toContain(config.SEED_ENCRYPTION_KEY);
+});

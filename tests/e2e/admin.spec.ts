@@ -11,6 +11,12 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
 }) => {
   test.skip(!process.env.E2E_DATABASE_URL, 'Requires isolated PostgreSQL and API');
   test.setTimeout(120000);
+  page.setDefaultTimeout(15000);
+  page.on('pageerror', (error) => console.log('ADMIN_PAGE_ERROR', error.message));
+  page.on('response', (response) => {
+    if (response.status() >= 400 && new URL(response.url()).pathname.startsWith('/api/'))
+      console.log('ADMIN_HTTP_ERROR', new URL(response.url()).pathname, response.status());
+  });
   const { pool } = database(process.env.E2E_DATABASE_URL!);
   const password = 'E2E-admin-password-1234',
     key = process.env.SEED_ENCRYPTION_KEY!,
@@ -92,6 +98,7 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
       [b.id, encryptSeed(secret, key)],
     );
     const approver = await other.newPage();
+    approver.setDefaultTimeout(15000);
     await signIn(approver, b.email, totpCode(secret, BigInt(Math.floor(Date.now() / 30000))));
     await approver.getByRole('button', { name: 'Financeiro', exact: true }).click();
     const request = approver.getByRole('row').filter({ hasText: reason });

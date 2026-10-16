@@ -134,6 +134,14 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       throw new AppError('ADMIN_FORBIDDEN', 403);
     return user;
   };
+  app.get('/v1/auth/config', async () => {
+    const required = !(config.TURNSTILE_BYPASS === 'true' && config.NODE_ENV !== 'production');
+    return {
+      required,
+      siteKey: config.TURNSTILE_SITE_KEY ?? null,
+      ready: !required || Boolean(config.TURNSTILE_SECRET),
+    };
+  });
   app.get('/health', async () => ({ status: 'ok', demo: true, realMoney: false }));
   app.get('/ready', async () => {
     await pool.query('SELECT 1');
@@ -511,6 +519,14 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       ),
     ]);
     return {
+      configuration: {
+        captchaReady:
+          config.TURNSTILE_BYPASS === 'true' ||
+          Boolean(config.TURNSTILE_SECRET && config.TURNSTILE_SITE_KEY),
+        smtpExternal: !['localhost', '127.0.0.1', 'mailpit'].includes(
+          new URL(config.SMTP_URL).hostname,
+        ),
+      },
       workers: workers.rows,
       outbox: queue.rows[0],
       email: mail.rows[0],

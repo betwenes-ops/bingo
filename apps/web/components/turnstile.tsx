@@ -12,12 +12,18 @@ declare global {
     turnstile?: Widget;
   }
 }
-export function Turnstile({ onToken }: { onToken: (value: string) => void }) {
+export function Turnstile({
+  onToken,
+  siteKey,
+}: {
+  onToken: (value: string) => void;
+  siteKey?: string | null;
+}) {
   const root = useRef<HTMLDivElement>(null);
   const callback = useRef(onToken);
   callback.current = onToken;
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    const key = siteKey;
     if (!key) return;
     let id: string | undefined;
     let stopped = false;
@@ -44,6 +50,6 @@ export function Turnstile({ onToken }: { onToken: (value: string) => void }) {
       script?.removeEventListener('load', render);
       if (id) window.turnstile?.remove(id);
     };
-  }, []);
+  }, [siteKey]);
   return <div ref={root} />;
 }

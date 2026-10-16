@@ -1,4 +1,5 @@
 'use client';
+import { SessionReminder } from '../components/session-reminder';
 import { useState, useEffect, useCallback } from 'react';
 import {
   ArrowUpRight,
@@ -128,6 +129,7 @@ export default function Home() {
   const open = rooms.filter((r) => r.state === 'OPEN_FOR_SALES' || r.state === 'DRAWING');
   return (
     <div className="app">
+      {user && <SessionReminder onLimits={() => navigate('profile')} />}
       <div className="demo-banner">
         <ShieldCheck size={13} />
         {DEMO_NOTICE}

@@ -18,6 +18,30 @@ export function Auth({
     el?.showModal();
     return () => el?.close();
   }, []);
+  const [security, setSecurity] = useState<{
+    required: boolean;
+    siteKey: string | null;
+    ready: boolean;
+  } | null>(null);
+  const [securityError, setSecurityError] = useState(false);
+  const [captchaAttempt, setCaptchaAttempt] = useState(0);
+  useEffect(() => {
+    let active = true;
+    void fetch('/api/security-config', { cache: 'no-store' })
+      .then(async (r) => {
+        if (!r.ok) throw Error();
+        return r.json() as Promise<{ required: boolean; siteKey: string | null; ready: boolean }>;
+      })
+      .then((config) => {
+        if (active) setSecurity(config);
+      })
+      .catch(() => {
+        if (active) setSecurityError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'reset'>(
     resetToken ? 'reset' : 'login',
   );
@@ -64,6 +88,8 @@ export function Auth({
       setError((err as Error).message);
     } finally {
       setBusy(false);
+      setToken('');
+      setCaptchaAttempt((value) => value + 1);
     }
   }
   return (
@@ -133,7 +159,19 @@ export function Auth({
               />
             </label>
           )}
-          {mode !== 'reset' && <Turnstile onToken={setToken} />}
+          {mode !== 'reset' && security?.required && security.siteKey && (
+            <Turnstile
+              key={`${mode}-${captchaAttempt}`}
+              siteKey={security.siteKey}
+              onToken={setToken}
+            />
+          )}
+          {mode !== 'reset' && (securityError || security?.ready === false) && (
+            <p className="error" role="alert">
+              O acesso está temporariamente em configuração. A verificação de segurança precisa ser
+              concluída pelo responsável pela plataforma.
+            </p>
+          )}
           {error && (
             <p className="error" role="alert">
               {error}
@@ -144,7 +182,12 @@ export function Auth({
               {message}
             </p>
           )}
-          <button className="primary wide" disabled={busy}>
+          <button
+            className="primary wide"
+            disabled={
+              busy || (mode !== 'reset' && (!security?.ready || (security.required && !token)))
+            }
+          >
             {busy
               ? 'Só um instante…'
               : mode === 'login'

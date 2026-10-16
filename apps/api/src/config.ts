@@ -11,6 +11,7 @@ const schema = z.object({
   SMTP_URL: z.string().default('smtp://localhost:1025'),
   MAIL_FROM: z.email().default('demo@bingo.local'),
   TURNSTILE_SECRET: z.string().optional(),
+  TURNSTILE_SITE_KEY: z.string().optional(),
   TURNSTILE_BYPASS: z.enum(['true', 'false']).default('false'),
   REAL_MONEY_ENABLED: z.enum(['true', 'false']).default('false'),
 });

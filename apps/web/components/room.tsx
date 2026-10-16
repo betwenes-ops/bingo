@@ -1,4 +1,5 @@
 'use client';
+import { DrawAudio } from './draw-audio';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { ArrowLeft, ShieldCheck, Wifi, Plus, Minus, Layers, Box, Check } from 'lucide-react';
@@ -272,6 +273,7 @@ export function Room({
           )}
         </div>
         <div className="game-settings">
+          <DrawAudio number={latest} />
           <Box size={16} />
           <label>
             Qualidade visual
