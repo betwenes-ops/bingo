@@ -70,4 +70,16 @@ Integração usa Testcontainers com PostgreSQL 16 real e requer Docker, ou `TEST
 
 [Briefing](PROJECT_BRIEF.md) · [Arquitetura proposta](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Riscos](docs/RISKS.md) · [Decisões](docs/adr/README.md) · [Relatório de implementação](docs/reports/implementation-2026-10-16.md)
 
+[**CI verificado: 44 testes passaram**](https://github.com/betwenes-ops/bingo/actions/runs/38909273073): 24 locais, 14 de integração em PostgreSQL real e 6 de navegador, incluindo o fluxo completo em desktop/celular. Build, lint, typecheck e auditoria também passaram.
+
 O relatório distingue testes executados, testes apenas configurados e gates ainda abertos. Não há deploy público nesta entrega.
+
+## Capturas reais dos testes
+
+![Lobby com dados reais do ambiente de teste](docs/screenshots/lobby-desktop.webp)
+
+![Rodada concluída com crédito e verificação](docs/screenshots/game-completed-desktop.webp)
+
+[Mobile — sala](docs/screenshots/game-completed-mobile.webp) · [Mobile — individual](docs/screenshots/instant-result-mobile.webp) · [Desktop — individual](docs/screenshots/instant-result-desktop.webp)
+
+Amostras com usuários/salas de teste explicitamente identificados. [Estado por fase](docs/STATUS.md) · [Protocolo de verificação](docs/rng-protocol.md) · [Ativos e licenças](docs/asset-needs.md)

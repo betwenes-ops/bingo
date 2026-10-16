@@ -9,11 +9,13 @@ $ turbo build
 
 @bingo/bingo-math:build: cache hit, replaying logs cc2c5242e3ff0c99
 @bingo/bingo-math:build: $ tsc --noEmit
+@bingo/domain:build: cache hit, replaying logs 2a97412753e4d7da
+@bingo/domain:build: $ tsc --noEmit
 @bingo/protocol:build: cache hit, replaying logs 88080f7a8f325cb1
 @bingo/protocol:build: $ tsc --noEmit
-@bingo/domain:build: cache miss, executing 2a97412753e4d7da
-@bingo/admin:build: cache miss, executing 08c76fab215f76a6
-@bingo/domain:build: $ tsc --noEmit
+@bingo/api:build: cache miss, executing 08c4db279dbab2ea
+@bingo/web:build: cache miss, executing 071aff4ae99cc6e9
+@bingo/admin:build: cache hit, replaying logs 08c76fab215f76a6
 @bingo/admin:build: $ next build
 @bingo/admin:build: ▲ Next.js 16.4.1 (Turbopack)
 @bingo/admin:build: ✓ Running next.config.ts took 35ms
@@ -21,19 +23,9 @@ $ turbo build
 @bingo/admin:build:   Creating an optimized production build ...
 @bingo/admin:build: ✓ Compiled successfully in 681ms
 @bingo/admin:build:   Running TypeScript ...
-@bingo/api:build: cache miss, executing d7f61ba997f4519f
-@bingo/web:build: cache miss, executing e835bb711b0eac18
-@bingo/web:build: $ next build
-@bingo/api:build: $ tsc --noEmit
-@bingo/web:build: ▲ Next.js 16.4.1 (Turbopack)
-@bingo/web:build: ✓ Running next.config.ts took 40ms
-@bingo/web:build: 
-@bingo/web:build:   Creating an optimized production build ...
 @bingo/admin:build:   Finished TypeScript in 2.3s ...
 @bingo/admin:build:   Collecting page data using 4 workers ...
 @bingo/admin:build:   Generating static pages using 4 workers (0/3) ...
-@bingo/web:build: ✓ Compiled successfully in 2.0s
-@bingo/web:build:   Running TypeScript ...
 @bingo/admin:build: ✓ Generating static pages using 4 workers (3/3) in 811ms
 @bingo/admin:build:   Finalizing page optimization ...
 @bingo/admin:build: 
@@ -44,10 +36,18 @@ $ turbo build
 @bingo/admin:build: 
 @bingo/admin:build: ○  (Static)  prerendered as static content
 @bingo/admin:build: 
-@bingo/web:build:   Finished TypeScript in 3.5s ...
+@bingo/web:build: $ next build
+@bingo/api:build: $ tsc --noEmit
+@bingo/web:build: ▲ Next.js 16.4.1 (Turbopack)
+@bingo/web:build: ✓ Running next.config.ts took 39ms
+@bingo/web:build: 
+@bingo/web:build:   Creating an optimized production build ...
+@bingo/web:build: ✓ Compiled successfully in 970ms
+@bingo/web:build:   Running TypeScript ...
+@bingo/web:build:   Finished TypeScript in 3.1s ...
 @bingo/web:build:   Collecting page data using 4 workers ...
 @bingo/web:build:   Generating static pages using 4 workers (0/3) ...
-@bingo/web:build: ✓ Generating static pages using 4 workers (3/3) in 702ms
+@bingo/web:build: ✓ Generating static pages using 4 workers (3/3) in 835ms
 @bingo/web:build:   Finalizing page optimization ...
 @bingo/web:build: 
 @bingo/web:build: Route (app)
@@ -59,8 +59,7 @@ $ turbo build
 @bingo/web:build: 
 
  Tasks:    6 successful, 6 total
-Cached:    2 cached, 6 total
-  Time:    11.225s 
+Cached:    4 cached, 6 total
+  Time:    7.745s 
 
  WARNING  no output files found for task @bingo/api#build. Please check your `outputs` key in `turbo.json`
- WARNING  no output files found for task @bingo/domain#build. Please check your `outputs` key in `turbo.json`

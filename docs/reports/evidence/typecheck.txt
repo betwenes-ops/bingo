@@ -15,12 +15,12 @@ $ turbo typecheck
 @bingo/domain:typecheck: $ tsc --noEmit
 @bingo/admin:typecheck: cache hit, replaying logs a05c783c70205e13
 @bingo/admin:typecheck: $ tsc --noEmit
-@bingo/api:typecheck: cache hit, replaying logs 1ebb2249ef3c8d4a
+@bingo/web:typecheck: cache miss, executing 33598d91e4b69652
+@bingo/api:typecheck: cache miss, executing cc4eb1f08c21fc5f
 @bingo/api:typecheck: $ tsc --noEmit
-@bingo/web:typecheck: cache miss, executing 55de76e854fcbdc7
 @bingo/web:typecheck: $ tsc --noEmit
 
  Tasks:    6 successful, 6 total
-Cached:    5 cached, 6 total
-  Time:    2.498s 
+Cached:    4 cached, 6 total
+  Time:    4.508s 
 

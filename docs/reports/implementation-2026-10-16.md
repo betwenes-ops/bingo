@@ -10,7 +10,7 @@ O razão usa BIGINT e triggers diferidas para balanceamento; headers/entries sã
 
 ## Evidências locais
 
-Saídas reais em evidence/typecheck.txt, evidence/lint.txt, evidence/build.txt e evidence/unit-coverage.txt. Testes: 23 testes locais de domínio, matemática, segurança HTTP e verificação independente; cartelas com 1.000 amostras por modalidade e teste estatístico de primeira posição com seed fixa. A cobertura reportada pelo executor refere-se ao núcleo de regras mostrado no relatório; não é cobertura de 90% da API/carteira.
+Saídas reais em evidence/typecheck.txt, evidence/lint.txt, evidence/build.txt e evidence/unit-coverage.txt. Testes: 24 testes locais de domínio, matemática, segurança HTTP e verificação independente; cartelas com 1.000 amostras por modalidade e teste estatístico de primeira posição com seed fixa. A cobertura reportada pelo executor refere-se ao núcleo de regras mostrado no relatório; não é cobertura de 90% da API/carteira.
 
 Matemática: instant-math.json registra 1.000.000 de partidas, RTP teórico 0,9486071910554115 para participação 100, simulado 0,94437501, IC95% [0,9394111325415594; 0,9493388874584406]. Resultado compatível. Distribuição por maior pagamento; não somamos probabilidades marginais sobrepostas. Fonte e comando em scripts/simulate.ts.
 
@@ -23,3 +23,17 @@ Não há Docker nem PostgreSQL utilizável neste executor. O teste nativo encont
 Fases 0–8 permanecem com itens abertos: falta executar o Compose completo e ampliar a cobertura da API/carteira; identidade sem rotação automática de sessão e fluxo LGPD completo; reservas, prêmio fixo, ajustes com dupla aprovação; catálogo/versionamento administrável; ciclo de estados completo; Redis fan-out consumidor, snapshots periódicos; segurança/matemática completas; som/PWA/perfis/FPS/Lighthouse; relatórios avançados, suporte e carga/restauração. Não foi comprovada capacidade para 10.000 jogadores.
 
 Nenhuma pendência depende de nova aprovação para continuar a implementação. Custos, provedores e ativação monetária não foram assumidos. Dinheiro real permanece indisponível, inclusive no boot.
+
+## Resultado final verificado
+
+Código executável: commit `0d976dd6ff3cb7e1b5e5e9f1a7852671bc39da09`.
+
+[CI final verde](https://github.com/betwenes-ops/bingo/actions/runs/38909273073): instalação congelada, formatação, lint, typecheck, 24 testes locais, 14 integrações PostgreSQL real, build, migrações, API real, 6 testes de navegador e auditoria concluídos com sucesso. **44 testes no total**, além das milhares de amostras de propriedades e da simulação matemática independente. Saída integral: evidence/ci-final.txt.
+
+O fluxo de navegador passou em desktop e celular: cadastro, link real de confirmação, login, compra, sorteio e premiação, saldo/extrato, verificação pública, individual e verificação independente de compromisso, sequência, cartela e pagamento. O teste lê o e-mail real enfileirado no banco isolado; a entrega SMTP/Mailpit completa não foi coberta pelo navegador. O relógio das bolas é acelerado no teste, sem alterar sequência, cartela, avaliação ou prêmio.
+
+Integração adicional confirmou que reset de senha invalida sessões e que o papel runtime pode operar compras sem poder alterar o razão, ler a tabela de migrações ou desabilitar triggers. Rate limit agora preserva HTTP 429, com teste de regressão, e o limite geral de leitura comporta a cadência rápida da sala sem enfraquecer o limite específico do login/cadastro.
+
+Capturas reais em ../screenshots/ vieram do run 38908649852, que contém a mesma UI do commit executável final. As prévias WebP são comprimidas; PNGs originais permanecem nos artefatos do CI. Foi corrigida a captura de cabeçalhos sticky: o teste volta ao topo antes da captura completa. Dados visíveis são contas/salas de teste.
+
+O commit de documentação posterior apenas registra evidências, licenças e imagens, sem modificar código executável. Nenhum deploy público foi realizado. Os gates integrais listados acima continuam abertos; CI verde não significa que todo o briefing ou os testes de carga estejam concluídos.

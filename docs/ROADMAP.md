@@ -1,6 +1,6 @@
 # Roadmap verificável
 
-Status: somente planejamento; nenhuma fase de implementação aprovada ou concluída. Dependências seguem a ordem abaixo. Cada fase exige docs/reports/fase-N.md com arquivos, comandos, saída real, cobertura, medições, screenshots quando houver UI, ADRs, pendências e decisões humanas.
+Plano original de referência; a implementação inicial avançou com execução autônoma autorizada. Consulte STATUS.md para os resultados reais; nenhum gate integral foi declarado fechado. Dependências seguem a ordem abaixo. Cada fase exige docs/reports/fase-N.md com arquivos, comandos, saída real, cobertura, medições, screenshots quando houver UI, ADRs, pendências e decisões humanas.
 
 | Fase               | Entrega                                                                                                                            | Gate e evidência obrigatória                                                                                                                                                                                                                |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
