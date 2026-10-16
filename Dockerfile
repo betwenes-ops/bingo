@@ -5,7 +5,7 @@ WORKDIR /app
 RUN npm install --global pnpm@11.25.0
 COPY . .
 RUN pnpm install --frozen-lockfile
-ARG API_INTERNAL_URL=https://bingoapi-production-e17b.up.railway.app
+ARG API_INTERNAL_URL=http://api:4000
 ENV API_INTERNAL_URL=$API_INTERNAL_URL
 RUN pnpm build
 ENV NODE_ENV=development
