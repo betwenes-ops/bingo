@@ -26,7 +26,7 @@ O lobby público foi inspecionado visualmente: apresentação escura/dourada e e
 
 ## Trabalho externo ainda necessário
 
-A integração Railway já foi conectada. Worker persistente e Redis com volume foram criados; heartbeat do worker no Supabase e PING Redis autenticado foram confirmados. Foram corrigidos filtros de deploy compartilhados, portas/healthchecks e variáveis da API/Next. Restam as credenciais reais do CAPTCHA do domínio e SMTP, a comprovação da credencial SQL restrita e o fluxo público completo. O admin permanece privado: gerar domínio público foi bloqueado pela revisão automática por ampliar a exposição do painel e exige confirmação específica antes de tentar novamente. Depois executar cadastro real com confirmação, MFA administrativo, compra, sorteio automático, premiação, prova e conciliação pelo site público. [Guia exato](../railway.md).
+A integração Railway já foi conectada. Worker persistente e Redis com volume foram criados; heartbeat do worker no Supabase e PING Redis autenticado foram confirmados. Foram corrigidos filtros de deploy compartilhados, portas/healthchecks e variáveis da API/Next. Restam as credenciais reais do CAPTCHA do domínio e SMTP, a comprovação da credencial SQL restrita e o fluxo público completo. A revisão automática inicialmente bloqueou gerar domínio público do admin. Após autorização explícita adicional do usuário, foi publicado https://bingoadmin-production.up.railway.app com origem exata na API, preservando autenticação e MFA. Depois executar cadastro real com confirmação, MFA administrativo, compra, sorteio automático, premiação, prova e conciliação pelo site público. [Guia exato](../railway.md).
 
 Não declarar 100% do briefing: permanecem gates de carga 5k/10k e capacidade da hospedagem, observabilidade operacional, chaveiro/rotação de seeds, revisão independente, retenção e medições em dispositivos reais. O escopo de testes já aprovado está distinguido do trabalho de operação pendente em [STATUS](../STATUS.md).
 
@@ -39,3 +39,7 @@ Não declarar 100% do briefing: permanecem gates de carga 5k/10k e capacidade da
 - CI completo do commit e371001 aprovado: https://github.com/betwenes-ops/bingo/actions/runs/38963238633. O probe operacional posterior recebeu typecheck, lint e formatação locais; o PING foi comprovado no serviço real.
 
 Os cinco serviços foram observados em estado terminal SUCCESS após as configurações; o admin permanece sem domínio e Redis sem proxy TCP público. [Inventário sanitizado e verificações](evidence/railway-2026-10-16.json).
+
+## Publicação autorizada do admin
+
+Em 2026-10-16 o usuário respondeu explicitamente “sim autorizo” à publicação do painel. O domínio Railway `bingoadmin-production.up.railway.app` foi criado com destino 3001. A página respondeu 200 e `/api/v1/admin/health` sem sessão retornou 401 UNAUTHENTICATED. ALLOWED_ORIGINS inclui apenas as origens exatas do jogador, do admin e localhost:3001. Nenhuma conta padrão foi criada. As pendências de CAPTCHA, SMTP e validação autenticada pública continuam abertas.

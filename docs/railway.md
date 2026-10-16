@@ -3,6 +3,7 @@
 Estado observado em 2026-10-16. O repositório já está ligado a serviços públicos; isso não confirma todos os requisitos de operação.
 
 - Jogador: https://bingoweb-production-8b1f.up.railway.app/
+- Administração: https://bingoadmin-production.up.railway.app
 - API: https://bingoapi-production-e17b.up.railway.app
 - Supabase: projeto `pjsngxhbxdykcydzcjhi`, schema privado `bingo`.
 
@@ -12,12 +13,12 @@ O proxy HTTP público voltou a responder 200. A API responde `/ready`. O cadastr
 
 Todos usam o Dockerfile da raiz e o repositório completo. Em projetos novos, os aplicativos Next respeitam `PORT` fornecida pela plataforma. O perfil do projeto Railway existente preserva as portas 3000/3001 às quais os domínios já estavam ligados; `NEXT_PORT` permite uma substituição explícita. Ao trocar a porta, atualize também a porta de destino do domínio no Railway. Configure o comando inicial de cada serviço:
 
-| Serviço       | Comando                            | Domínio público                                         |
-| ------------- | ---------------------------------- | ------------------------------------------------------- |
-| Jogador       | `pnpm --filter @bingo/web start`   | Sim                                                     |
-| Administração | `pnpm --filter @bingo/admin start` | Não nesta implantação; acesso privado e MFA obrigatório |
-| API/WebSocket | `pnpm --filter @bingo/api start`   | Sim, HTTPS/WSS                                          |
-| Worker        | `pnpm --filter @bingo/api worker`  | Não                                                     |
+| Serviço       | Comando                            | Domínio público                              |
+| ------------- | ---------------------------------- | -------------------------------------------- |
+| Jogador       | `pnpm --filter @bingo/web start`   | Sim                                          |
+| Administração | `pnpm --filter @bingo/admin start` | Sim; conta administrativa e MFA obrigatórios |
+| API/WebSocket | `pnpm --filter @bingo/api start`   | Sim, HTTPS/WSS                               |
+| Worker        | `pnpm --filter @bingo/api worker`  | Não                                          |
 
 Para um novo deploy, aplique migrações com `pnpm db:migrate` usando credencial de migração em etapa separada antes de iniciar a versão dependente. O Supabase já contém as quatro migrações atuais. Não reaplicar bootstrap sobre schema existente. Não incluir banco ou chave de seeds na etapa de build. Certifique-se de que mudanças na raiz, packages e apps disparam novo deploy; filtros de arquivos que excluam Dockerfile/configuração podem manter versões antigas.
 
@@ -50,11 +51,13 @@ A integração Railway foi conectada e utilizada: worker e Redis foram criados; 
 
 Insira os segredos diretamente na aba Variables do serviço Railway; não os publique em GitHub, screenshots ou conversa.
 
-1. Cloudflare Turnstile: criar/configurar widget para `bingoweb-production-8b1f.up.railway.app`. Na API, definir `TURNSTILE_SITE_KEY` pública, `TURNSTILE_SECRET` privada e `TURNSTILE_BYPASS=false`. O frontend consulta a chave pública em runtime; não precisa rebuild para trocar a chave. Nunca usar chaves de teste para declarar proteção pública pronta.
+1. Cloudflare Turnstile: criar/configurar widget para `bingoweb-production-8b1f.up.railway.app` e `bingoadmin-production.up.railway.app`. Na API, definir `TURNSTILE_SITE_KEY` pública, `TURNSTILE_SECRET` privada e `TURNSTILE_BYPASS=false`. O frontend consulta a chave pública em runtime; não precisa rebuild para trocar a chave. Nunca usar chaves de teste para declarar proteção pública pronta.
 2. Provedor de e-mail: definir `SMTP_URL` com autenticação/TLS e `MAIL_FROM` com remetente autorizado na API e no worker. Também é possível definir na API e referenciar no worker com `${{@bingo/api.SMTP_URL}}` e `${{@bingo/api.MAIL_FROM}}` depois de existirem. O Mailpit local não entrega mensagens reais.
 3. Após existirem as chaves, definir `NODE_ENV=production` na API e worker, `TURNSTILE_BYPASS=false`, e fornecer as duas variáveis Turnstile ao worker pela configuração compartilhada. O worker não expõe login, mas a configuração atual comum valida CAPTCHA no modo production. Não substituir DATABASE_URL ou SEED_ENCRYPTION_KEY durante essa ativação.
 4. Confirmar `/api/security-config` com required/ready verdadeiros, criar conta própria pelo site, verificar recebimento real de e-mail, executar a rodada completa e conciliação. Esses passos públicos continuam pendentes e não foram simulados por SQL.
 
-### Administração privada
+### Administração publicada com autorização explícita
 
-A criação de um domínio público para o admin foi bloqueada pela revisão automática: a autorização geral de concluir a hospedagem não foi considerada autorização específica para expor esse painel sensível. Nenhum domínio alternativo ou proxy público foi criado para contornar o bloqueio. O serviço continua privado. A API permite a origem exata `http://localhost:3001` para uso privado por encaminhamento autenticado, além do domínio público do jogador; não foi habilitado wildcard. Publicar o painel requer confirmação explícita do usuário e inclusão da origem HTTPS exata resultante.
+O usuário autorizou explicitamente a exposição do painel em 2026-10-16, após o bloqueio anterior da revisão automática. Foi criado o domínio `https://bingoadmin-production.up.railway.app`, direcionado à porta 3001, e a origem HTTPS exata foi adicionada a ALLOWED_ORIGINS da API, preservando a origem do jogador e localhost:3001. Não há wildcard.
+
+A página pública responde 200; `/api/v1/admin/health` sem sessão responde 401 UNAUTHENTICATED. Não foi criado admin padrão nem removida a exigência de MFA. Acessar o painel exige conta verificada promovida explicitamente e TOTP. CAPTCHA e SMTP reais continuam pendentes; a disponibilidade da página não equivale a login administrativo público validado.
