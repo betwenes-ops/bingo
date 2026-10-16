@@ -7,7 +7,7 @@ export function AppRuntime() {
     update();
     window.addEventListener('online', update);
     window.addEventListener('offline', update);
-    if ('serviceWorker' in navigator && location.protocol === 'https:')
+    if ('serviceWorker' in navigator && window.isSecureContext)
       void navigator.serviceWorker.register('/sw.js').catch(() => {});
     return () => {
       window.removeEventListener('online', update);

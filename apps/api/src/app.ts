@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import { telemetry } from './telemetry';
 import { RealtimeHub, issueSocketTicket, readSocketTicket } from './realtime';
 import { managementRoutes } from './management-routes';
 import { requireRole } from './operations';
@@ -71,6 +72,23 @@ export async function buildApp(pool: pg.Pool, config: Config) {
   });
   const registry = new Registry();
   collectDefaultMetrics({ register: registry });
+  const metrics = telemetry(registry, pool);
+  const requestStarted = new WeakMap<object, number>();
+  app.addHook('onRequest', async (request) => {
+    requestStarted.set(request, performance.now());
+  });
+  app.addHook('onResponse', async (request, reply) => {
+    const started = requestStarted.get(request);
+    if (started !== undefined)
+      metrics.requestSeconds.observe(
+        {
+          method: request.method,
+          route: request.routeOptions.url ?? 'unmatched',
+          status: String(reply.statusCode),
+        },
+        (performance.now() - started) / 1000,
+      );
+  });
   app.addHook('onRequest', async (request) => {
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
       const origin = request.headers.origin;
@@ -410,6 +428,7 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       unsubscribe?.();
       if (userId) {
         connectionCount--;
+        metrics.sockets.set(connectionCount);
         const count = (perUser.get(userId) ?? 1) - 1;
         if (count) perUser.set(userId, count);
         else perUser.delete(userId);
@@ -445,6 +464,7 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       userId = uid;
       sessionId = sid;
       connectionCount++;
+      metrics.sockets.set(connectionCount);
       perUser.set(uid, (perUser.get(uid) ?? 0) + 1);
       unsubscribe = hub.subscribe(roundId, seq, (event) => {
         if (socket.readyState !== 1) throw Error('CLOSED');

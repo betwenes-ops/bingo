@@ -97,7 +97,7 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
     const request = approver.getByRole('row').filter({ hasText: reason });
     await expect(request).toBeVisible();
     await request.getByLabel('Justificativa da decisão').fill('Conferido por outra pessoa no E2E');
-    await request.getByLabel('Decisão', { exact: true }).selectOption('approve');
+    await request.getByLabel('Decisão').selectOption('approve');
     await request.getByRole('button', { name: 'Registrar decisão' }).click();
     await expect(request.getByRole('button', { name: 'Registrar decisão' })).toHaveCount(0);
     expect(
