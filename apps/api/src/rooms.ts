@@ -209,11 +209,13 @@ async function refund(tx: Tx, round: Round) {
     ]);
     await moveBalance(tx, p.user_id, total);
   }
+  // Terminal rows are frozen by the database. Append the final event first;
+  // state, refund and outbox still commit atomically.
+  await event(tx, round.id, 'GAME_CANCELLED', { reason: 'MINIMUM_NOT_MET' });
   await tx.query("UPDATE game_rounds SET state='CANCELLED',seed_revealed=$2 WHERE id=$1", [
     round.id,
     null,
   ]);
-  await event(tx, round.id, 'GAME_CANCELLED', { reason: 'MINIMUM_NOT_MET' });
 }
 export async function advanceRound(pool: pg.Pool, key: string, roundId: string) {
   return transaction(pool, async (tx) => {
@@ -329,11 +331,11 @@ export async function advanceRound(pool: pg.Pool, key: string, roundId: string) 
       [r.id, 'full'],
     );
     if (full.rowCount) {
+      await event(tx, r.id, 'GAME_FINISHED', { position });
       await tx.query(
         "UPDATE game_rounds SET state='COMPLETED',seed_revealed=$2,next_ball_at=NULL WHERE id=$1",
         [r.id, decryptSeed(r.seed_encrypted, key)],
       );
-      await event(tx, r.id, 'GAME_FINISHED', { position });
       await audit(tx, null, 'ROUND_COMPLETED', r.id, { position });
     }
   });
