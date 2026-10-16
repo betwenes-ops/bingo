@@ -50,9 +50,11 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
   }
   const other = await browser.newContext();
   try {
+    console.log('ADMIN_PHASE', 'fixtures');
     const a = await person(),
       b = await person();
     await signIn(page, a.email);
+    console.log('ADMIN_PHASE', 'first-login');
     await page.getByRole('button', { name: 'Configurar autenticador' }).click();
     await expect(page.getByLabel('Código de confirmação')).toBeVisible();
     const encrypted = (
@@ -62,6 +64,7 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
       .getByLabel('Código de confirmação')
       .fill(totpCode(decryptSeed(encrypted, key), BigInt(Math.floor(Date.now() / 30000))));
     await page.getByRole('button', { name: 'Ativar MFA' }).click();
+    console.log('ADMIN_PHASE', 'mfa-enabled');
     await expect(
       page.getByRole('button', { name: 'Operação e suporte', exact: true }),
     ).toBeVisible();
@@ -85,6 +88,7 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
       fullPage: true,
     });
     await page.getByRole('button', { name: 'Financeiro', exact: true }).click();
+    console.log('ADMIN_PHASE', 'finance');
     const reason = `Fundo E2E ${randomUUID()}`;
     await page.getByLabel('Créditos inteiros (negativo para débito)').fill('100');
     await page.getByLabel('Motivo auditável').fill(reason);
@@ -97,6 +101,7 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
       'INSERT INTO mfa_credentials(user_id,secret_encrypted,enabled) VALUES($1,$2,true)',
       [b.id, encryptSeed(secret, key)],
     );
+    console.log('ADMIN_PHASE', 'second-login');
     const approver = await other.newPage();
     approver.setDefaultTimeout(15000);
     await signIn(approver, b.email, totpCode(secret, BigInt(Math.floor(Date.now() / 30000))));
@@ -104,7 +109,7 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
     const request = approver.getByRole('row').filter({ hasText: reason });
     await expect(request).toBeVisible();
     await request.getByLabel('Justificativa da decisão').fill('Conferido por outra pessoa no E2E');
-    await request.getByLabel('Decisão').selectOption('approve');
+    await request.getByRole('combobox').selectOption('approve');
     await request.getByRole('button', { name: 'Registrar decisão' }).click();
     await expect(request.getByRole('button', { name: 'Registrar decisão' })).toHaveCount(0);
     expect(
@@ -115,7 +120,7 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
       ).rows[0],
     ).toMatchObject({ status: 'APPROVED', approved_by: b.id });
   } finally {
-    await other.close();
+    await other.close().catch(() => {});
     await pool.end();
   }
 });
