@@ -40,7 +40,7 @@ Reiniciar API/worker não deve apagar compras ou sorteios: os dados e a cadênci
 
 ## Banco no Supabase
 
-O projeto dedicado `bingo` já possui o schema privado com 35 tabelas e RLS. Configure `DATABASE_SCHEMA=bingo` no servidor ao usar esse banco; o Compose local continua usando `public`. A API pública está acessível; o worker e a configuração operacional ainda precisam ser concluídos. [Hospedagem e checklist concreto](docs/railway.md). [Configuração, verificações e limites](docs/supabase.md).
+O projeto dedicado `bingo` já possui o schema privado com 35 tabelas e RLS. Configure `DATABASE_SCHEMA=bingo` no servidor ao usar esse banco; o Compose local continua usando `public`. A API pública está acessível; o worker está ativo e conectado ao Redis. CAPTCHA e SMTP reais ainda precisam ser configurados. [Hospedagem e checklist concreto](docs/railway.md). [Configuração, verificações e limites](docs/supabase.md).
 
 ## Comandos de verificação
 
@@ -70,7 +70,7 @@ Integração usa Testcontainers com PostgreSQL 16 real e requer Docker, ou `TEST
 - Máquina de estados completa com trilha de transições e snapshots; versões imutáveis, agendamento/recorrência, cancelamento/estorno, papéis financeiros e suporte.
 - Histórico, atendimento privado, download dos próprios dados, notificações por API e desativação pseudonimizada. [Operação e retenção](docs/operations.md).
 
-**A operação pública ainda não está pronta.** O proxy de salas foi corrigido e há deploy público, mas CAPTCHA sem configuração completa impede cadastro e nenhum worker recente foi encontrado no banco. SMTP/Redis/credencial restrita e o fluxo público completo ainda precisam de validação no destino. [Configuração Railway](docs/railway.md). Redis/fan-out, interfaces administrativas e de privacidade, PWA, áudio opcional e qualidade adaptativa já foram implementados. Permanecem gates de observabilidade operacional, rotação de chaves, revisão independente e capacidade em produção. Nenhuma capacidade de 10.000 jogadores foi medida ou prometida.
+**A operação pública ainda não está pronta.** O proxy de salas foi corrigido e há deploy público, mas CAPTCHA sem configuração completa impede cadastro e faltam as credenciais de SMTP. Worker ativo e Redis autenticado já foram confirmados. Credencial SQL restrita e o fluxo público completo ainda precisam de validação no destino. O admin permanece privado. [Configuração Railway](docs/railway.md). Redis/fan-out, interfaces administrativas e de privacidade, PWA, áudio opcional e qualidade adaptativa já foram implementados. Permanecem gates de observabilidade operacional, rotação de chaves, revisão independente e capacidade em produção. Nenhuma capacidade de 10.000 jogadores foi medida ou prometida.
 
 ## Documentação e evidências
 

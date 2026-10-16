@@ -1,0 +1,86 @@
+{
+  "observedAt": "2026-10-16T20:52:10Z",
+  "projectId": "6ac1f620-3a63-421f-865c-06502fee7956",
+  "environmentId": "a8304ba7-7a78-4fbe-aa38-e472663735ba",
+  "services": [
+    {
+      "name": "bingo-worker",
+      "id": "7465b74b-3c6d-4b99-a7cb-b9159a2b6002",
+      "deployment": {
+        "id": "f8e5a5c6-719c-42d8-81ba-a4415d271249",
+        "status": "SUCCESS",
+        "createdAt": "2026-10-16T20:47:49.931Z",
+        "url": null
+      },
+      "public": false
+    },
+    {
+      "name": "@bingo/admin",
+      "id": "91a6b6da-ff1c-4492-9c0f-2a0e0e3488b7",
+      "deployment": {
+        "id": "2b73b08a-e4ff-408b-9932-4def0090392e",
+        "status": "SUCCESS",
+        "createdAt": "2026-10-16T20:49:11.704Z",
+        "url": null
+      },
+      "public": false
+    },
+    {
+      "name": "@bingo/web",
+      "id": "a28fca56-739c-43ea-b5c4-509b9918c043",
+      "deployment": {
+        "id": "50db91df-2c4f-4c96-8226-0126fc9ae37c",
+        "status": "SUCCESS",
+        "createdAt": "2026-10-16T20:49:04.283Z",
+        "url": null
+      },
+      "public": true
+    },
+    {
+      "name": "Redis",
+      "id": "4aa27f9f-0917-4e5e-b1c4-2f1ee7799a79",
+      "deployment": {
+        "id": "e3521306-8bf2-4f82-9634-a8bf3450b472",
+        "status": "SUCCESS",
+        "createdAt": "2026-10-16T20:44:40.686Z",
+        "url": null
+      },
+      "public": false
+    },
+    {
+      "name": "@bingo/api",
+      "id": "71997f7d-2440-4219-9c0c-c48c36bc840d",
+      "deployment": {
+        "id": "f25c0546-bb13-4b70-b544-d919afafe86e",
+        "status": "SUCCESS",
+        "createdAt": "2026-10-16T20:49:42.114Z",
+        "url": null
+      },
+      "public": true
+    }
+  ],
+  "checks": {
+    "apiReadyHTTP": 200,
+    "webHTTP": 200,
+    "roomsProxyHTTP": 200,
+    "websocketConfigHTTP": 200,
+    "healthyWorkers": 1,
+    "redisStartupPing": "succeeded",
+    "publicUsers": 0,
+    "captcha": {
+      "required": true,
+      "siteKey": null,
+      "ready": false
+    }
+  },
+  "remaining": [
+    "Real Turnstile keys",
+    "SMTP_URL and authorized MAIL_FROM",
+    "Public registration/email/game end-to-end validation",
+    "Restricted SQL runtime credential verification"
+  ],
+  "adminPublicDomain": {
+    "created": false,
+    "reason": "Automatic approval review rejected expanding the sensitive admin service's public exposure without explicit authorization."
+  }
+}

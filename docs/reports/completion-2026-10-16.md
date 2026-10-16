@@ -22,10 +22,20 @@ O código evoluiu para uma demonstração multiplayer operável em stack complet
 
 Essa bateria também aprovou o teste financeiro adicional, isolamento de schema Supabase e estágios de 100, 500 e 1.000 clientes. No estágio de 1.000, todos concluíram, com zero lacunas, duplicações ou divergências e p99 de entrega de 559 ms. Os percentis são do runner isolado com relógio acelerado, não da hospedagem pública.
 
-O lobby público foi inspecionado visualmente: apresentação escura/dourada e estado vazio real, sem salas ou contadores fabricados. HTTP público confirmou disponibilidade da API e proxy. Supabase: 35 tabelas, todas com RLS, quatro migrações, zero usuários e zero workers recentes; advisors de segurança sem avisos. Essas consultas não substituem autenticação de aplicação nem teste de entrega de e-mail.
+O lobby público foi inspecionado visualmente: apresentação escura/dourada e estado vazio real, sem salas ou contadores fabricados. HTTP público confirmou disponibilidade da API e proxy. Supabase: 35 tabelas, todas com RLS, quatro migrações, zero usuários; inicialmente zero workers recentes; advisors de segurança sem avisos. Essas consultas não substituem autenticação de aplicação nem teste de entrega de e-mail.
 
 ## Trabalho externo ainda necessário
 
-Conectar a integração Railway e configurar/validar worker persistente, CAPTCHA do domínio, SMTP, Redis, credencial restrita e variáveis das quatro aplicações. Depois executar cadastro real com confirmação, MFA administrativo, compra, sorteio automático, premiação, prova e conciliação pelo site público. [Guia exato](../railway.md).
+A integração Railway já foi conectada. Worker persistente e Redis com volume foram criados; heartbeat do worker no Supabase e PING Redis autenticado foram confirmados. Foram corrigidos filtros de deploy compartilhados, portas/healthchecks e variáveis da API/Next. Restam as credenciais reais do CAPTCHA do domínio e SMTP, a comprovação da credencial SQL restrita e o fluxo público completo. O admin permanece privado: gerar domínio público foi bloqueado pela revisão automática por ampliar a exposição do painel e exige confirmação específica antes de tentar novamente. Depois executar cadastro real com confirmação, MFA administrativo, compra, sorteio automático, premiação, prova e conciliação pelo site público. [Guia exato](../railway.md).
 
 Não declarar 100% do briefing: permanecem gates de carga 5k/10k e capacidade da hospedagem, observabilidade operacional, chaveiro/rotação de seeds, revisão independente, retenção e medições em dispositivos reais. O escopo de testes já aprovado está distinguido do trabalho de operação pendente em [STATUS](../STATUS.md).
+
+## Evidência da continuação Railway
+
+- Worker `7465b74b-3c6d-4b99-a7cb-b9159a2b6002`: deploy `f8e5a5c6-719c-42d8-81ba-a4415d271249` observado SUCCESS; log `Redis startup probe succeeded`; Supabase registra um worker recente.
+- Redis `4aa27f9f-0917-4e5e-b1c4-2f1ee7799a79`: deploy `e3521306-8bf2-4f82-9634-a8bf3450b472` observado SUCCESS; imagem redis:8.2 e volume /data de 500 MB.
+- As referências DATABASE_URL, DATABASE_SCHEMA e SEED_ENCRYPTION_KEY usam as variáveis existentes da API. Nenhuma senha/chave foi lida, redefinida ou gravada no repositório.
+- Verificação HTTP: API /ready, proxy /api/v1/rooms, /api/security-config e /api/connection retornaram 200. O endpoint de conexão publica somente WSS da API; segurança continua required true, siteKey null, ready false.
+- CI completo do commit e371001 aprovado: https://github.com/betwenes-ops/bingo/actions/runs/38963238633. O probe operacional posterior recebeu typecheck, lint e formatação locais; o PING foi comprovado no serviço real.
+
+Os cinco serviços foram observados em estado terminal SUCCESS após as configurações; o admin permanece sem domínio e Redis sem proxy TCP público. [Inventário sanitizado e verificações](evidence/railway-2026-10-16.json).

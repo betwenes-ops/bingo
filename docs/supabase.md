@@ -12,7 +12,7 @@ Configure no ambiente privado do servidor:
 - `DATABASE_SCHEMA=bingo`.
 - A chave persistente `SEED_ENCRYPTION_KEY`, Redis e SMTP continuam necessários; preserve a chave para recuperar rodadas.
 
-A API pública responde `/ready` e consulta salas. Nenhum worker saudável foi encontrado. A credencial restrita de execução ainda não foi comprovada por uma sessão de aplicação com essa role. O conector não fornece a senha PostgreSQL. A role criada é NOLOGIN, portanto não constitui uma credencial pronta para uso. Não usar o proprietário `postgres` como usuário permanente da aplicação. A credencial restrita deve ser provisionada no destino durante a implantação.
+A API pública responde `/ready` e consulta salas. O worker Railway foi criado e registra heartbeat saudável no banco; a conexão ao Redis foi comprovada pelo probe de inicialização. A credencial restrita de execução ainda não foi comprovada por uma sessão de aplicação com essa role. O conector não fornece a senha PostgreSQL. A role criada é NOLOGIN, portanto não constitui uma credencial pronta para uso. Não usar o proprietário `postgres` como usuário permanente da aplicação. A credencial restrita deve ser provisionada no destino durante a implantação.
 
 `deploy/supabase-bootstrap.sql` registra a instalação reproduzível em schema novo. Execute o arquivo integralmente dentro de uma transação, após conferir o destino; a instalação rejeita schema existente. Os arquivos originais continuam em `apps/api/migrations`, e `schema_migrations` já contém os nomes corretos para que o runner da aplicação não tente reaplicar a base. Migrações futuras devem preservar RLS/políticas/permissões no schema privado.
 
