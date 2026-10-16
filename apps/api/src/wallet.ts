@@ -62,3 +62,14 @@ export async function checkLimits(tx: Tx, userId: string, amount: bigint) {
   if (BigInt(spent.rows[0]!.total) + amount > BigInt(l.daily_limit))
     throw new AppError('DAILY_LIMIT', 409);
 }
+
+/** Refundable sales are liabilities, never available guarantee capital. */
+export async function availableTreasury(tx: Tx, accountId: string) {
+  const row = (
+    await tx.query<{ available: string }>(
+      `SELECT ((SELECT COALESCE(sum(amount),0) FROM ledger_entries WHERE account_id=$1) - COALESCE((SELECT sum(p.total-CASE WHEN r.rules->>'policy'='fixed' THEN 0 ELSE (p.total*r.prize_bps)/10000 END) FROM card_purchases p JOIN game_rounds r ON r.id=p.round_id WHERE r.state IN ('CREATED','SCHEDULED','OPEN_FOR_SALES','SALES_CLOSED','READY')),0))::text AS available`,
+      [accountId],
+    )
+  ).rows[0]!;
+  return BigInt(row.available);
+}

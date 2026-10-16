@@ -16,7 +16,7 @@ DO $$ DECLARE t record; BEGIN
     END IF;
   END LOOP;
 END $$;
-GRANT UPDATE ON bingo.users,bingo.user_sessions,bingo.wallets,bingo.responsible_gaming_limits,bingo.game_rounds,bingo.mfa_credentials,bingo.instant_commitments,bingo.email_outbox,bingo.outbox_events,bingo.games,bingo.admin_adjustments,bingo.support_cases,bingo.notifications,bingo.room_schedules,bingo.wallet_reservations TO bingo_runtime;
+GRANT UPDATE ON bingo.users,bingo.user_sessions,bingo.wallets,bingo.responsible_gaming_limits,bingo.game_rounds,bingo.mfa_credentials,bingo.instant_commitments,bingo.email_outbox,bingo.outbox_events,bingo.games,bingo.admin_adjustments,bingo.support_cases,bingo.notifications,bingo.room_schedules,bingo.wallet_reservations,bingo.worker_heartbeats TO bingo_runtime;
 GRANT DELETE ON bingo.user_sessions,bingo.identity_tokens,bingo.mfa_credentials TO bingo_runtime;
 DO $$ DECLARE f record; BEGIN
   FOR f IN SELECT p.oid::regprocedure AS signature FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='bingo' LOOP

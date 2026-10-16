@@ -40,6 +40,8 @@ export type Snapshot = {
 };
 export const messages: Record<string, string> = {
   TWO_PERSON_REQUIRED: 'Outra pessoa precisa conferir esta solicitação.',
+  GUARANTEE_FUND_INSUFFICIENT:
+    'O fundo livre, descontadas as compras ainda reembolsáveis, não cobre o prêmio fixo.',
   TREASURY_INSUFFICIENT: 'O fundo não tem créditos suficientes para reservar este prêmio.',
   SALES_PAUSED: 'As vendas estão pausadas nesta sala.',
   GAME_UNAVAILABLE: 'Esta modalidade está temporariamente indisponível.',

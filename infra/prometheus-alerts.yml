@@ -1,0 +1,31 @@
+groups:
+  - name: bingo-demo
+    rules:
+      - alert: BingoWorkerMissing
+        expr: bingo_operational_state{kind="workers_healthy"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Nenhum worker do bingo envia atividade recente.
+      - alert: BingoDrawDelayed
+        expr: bingo_operational_state{kind="scheduler_lag_seconds"} > 10
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: Sorteio com atraso superior a dez segundos.
+      - alert: BingoOutboxGrowing
+        expr: bingo_operational_state{kind="outbox_pending"} > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Eventos aguardam publicação no Redis.
+      - alert: BingoMailDeliveryExhausted
+        expr: bingo_operational_state{kind="email_failed"} > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: E-mails esgotaram as tentativas automáticas de entrega.

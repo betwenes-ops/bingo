@@ -1,4 +1,4 @@
--- Dedicated Supabase project bingo; do not run on an existing bingo schema.
+-- Dedicated Supabase project bingo; run inside a transaction on a NEW schema only.
 CREATE SCHEMA bingo; SET LOCAL search_path = bingo, pg_catalog; CREATE TABLE bingo.schema_migrations(name text PRIMARY KEY, applied_at timestamptz DEFAULT now());
 CREATE TABLE users (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text NOT NULL UNIQUE,
@@ -125,6 +125,13 @@ CREATE TRIGGER adjustment_guard BEFORE UPDATE ON admin_adjustments FOR EACH ROW 
 CREATE TRIGGER adjustment_no_delete BEFORE DELETE ON admin_adjustments FOR EACH ROW EXECUTE FUNCTION immutable_record();
 
 INSERT INTO bingo.schema_migrations(name) VALUES ('0003_operations.sql');
+CREATE TABLE worker_heartbeats (instance_id uuid PRIMARY KEY, updated_at timestamptz NOT NULL DEFAULT now(), started_at timestamptz NOT NULL DEFAULT now(), rounds_advanced bigint NOT NULL DEFAULT 0);
+ALTER TABLE email_outbox ADD COLUMN attempts integer NOT NULL DEFAULT 0;
+ALTER TABLE email_outbox ADD COLUMN next_attempt_at timestamptz NOT NULL DEFAULT now();
+ALTER TABLE email_outbox ADD COLUMN last_error text;
+CREATE INDEX email_pending_retry ON email_outbox(next_attempt_at,created_at) WHERE delivered_at IS NULL;
+
+INSERT INTO bingo.schema_migrations(name) VALUES ('0004_worker_health.sql');
 -- Dedicated private schema only. Never alter Supabase service permissions.
 DO $$ BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='bingo_runtime') THEN
@@ -143,7 +150,7 @@ DO $$ DECLARE t record; BEGIN
     END IF;
   END LOOP;
 END $$;
-GRANT UPDATE ON bingo.users,bingo.user_sessions,bingo.wallets,bingo.responsible_gaming_limits,bingo.game_rounds,bingo.mfa_credentials,bingo.instant_commitments,bingo.email_outbox,bingo.outbox_events,bingo.games,bingo.admin_adjustments,bingo.support_cases,bingo.notifications,bingo.room_schedules,bingo.wallet_reservations TO bingo_runtime;
+GRANT UPDATE ON bingo.users,bingo.user_sessions,bingo.wallets,bingo.responsible_gaming_limits,bingo.game_rounds,bingo.mfa_credentials,bingo.instant_commitments,bingo.email_outbox,bingo.outbox_events,bingo.games,bingo.admin_adjustments,bingo.support_cases,bingo.notifications,bingo.room_schedules,bingo.wallet_reservations,bingo.worker_heartbeats TO bingo_runtime;
 GRANT DELETE ON bingo.user_sessions,bingo.identity_tokens,bingo.mfa_credentials TO bingo_runtime;
 DO $$ DECLARE f record; BEGIN
   FOR f IN SELECT p.oid::regprocedure AS signature FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='bingo' LOOP

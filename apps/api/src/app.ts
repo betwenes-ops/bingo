@@ -59,6 +59,10 @@ export async function buildApp(pool: pg.Pool, config: Config) {
     requestTimeout: 15000,
     trustProxy: false,
   }).withTypeProvider<ZodTypeProvider>();
+  app.addHook('onSend', async (_request, reply, payload) => {
+    reply.header('cache-control', 'no-store');
+    return payload;
+  });
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   await app.register(cookie);
@@ -177,7 +181,8 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       );
       reply.setCookie('session', result.token, {
         httpOnly: true,
-        secure: config.NODE_ENV === 'production',
+        secure:
+          config.NODE_ENV === 'production' || new URL(config.PUBLIC_WEB_URL).protocol === 'https:',
         sameSite: 'strict',
         path: '/',
         maxAge: 43200,

@@ -24,12 +24,18 @@ const clients: WebSocket[] = [],
   sequences = new Map<number, number>();
 let duplicates = 0,
   gaps = 0;
-const count = 100,
+const count = Number(process.env.LOAD_PARTICIPANTS ?? 100),
   key = process.env.SEED_ENCRYPTION_KEY!,
   origin = 'http://localhost:3000';
+const cooldown = async () => {
+  console.log(`Load ${count}: respecting per-IP rate limits before next arrival batch.`);
+  for (let i = 0; i < 3; i++) await new Promise((resolve) => setTimeout(resolve, 22000));
+};
 try {
+  if (![100, 500, 1000].includes(count)) throw Error('Supported load stages: 100, 500, 1000');
   if ((await pool.query('SELECT current_database() AS name')).rows[0].name !== 'bingo_e2e')
     throw Error('Unexpected database: refusing to create fixtures');
+  if (count > 100) await cooldown();
   const people = Array.from({ length: count }, () => ({
     id: randomUUID(),
     account: randomUUID(),
@@ -65,10 +71,10 @@ try {
     await postLedger(tx, 'LOAD_FIXTURE', randomUUID(), entries);
   });
   const room = await createRoom(pool, key, people[0]!.id, {
-    name: 'Carga CI — 100 participantes fictícios',
+    name: `Carga CI — ${count} participantes fictícios`,
     variant: 75,
     price: '100',
-    salesSeconds: 60,
+    salesSeconds: 600,
     ballIntervalMs: 1000,
     maxCards: 24,
     prizeBps: 8500,
@@ -76,55 +82,63 @@ try {
   });
   const finished = new Set<number>();
   const started = Date.now();
-  await Promise.all(
-    people.map(
-      (person, index) =>
-        new Promise<void>((resolve, reject) => {
-          const ticket = issueSocketTicket(key, person.session, person.id, room.id);
-          const url = new URL('/v1/realtime', base);
-          url.protocol = 'ws:';
-          url.searchParams.set('roundId', room.id);
-          url.searchParams.set('lastSeq', '0');
-          url.searchParams.set('ticket', ticket);
-          const client = new WebSocket(url, { headers: { origin } });
-          clients.push(client);
-          const timeout = setTimeout(() => reject(Error('WS_OPEN_TIMEOUT')), 15000);
-          client.once('open', () => {
-            clearTimeout(timeout);
-            resolve();
-          });
-          client.on('error', reject);
-          client.on('message', (buffer) => {
-            const event = JSON.parse(String(buffer)) as { seq: number; type: string; ts: string };
-            const previous = sequences.get(index) ?? 0;
-            if (event.seq <= previous) duplicates++;
-            else {
-              if (event.seq !== previous + 1) gaps++;
-              sequences.set(index, event.seq);
-            }
-            if (event.type === 'BALL_DRAWN')
-              latencies.push(Math.max(0, Date.now() - Date.parse(event.ts)));
-            if (event.type === 'GAME_FINISHED') finished.add(index);
-          });
-        }),
-    ),
-  );
-  await Promise.all(
-    people.map(async (person) => {
-      const response = await fetch(new URL(`/v1/rounds/${room.id}/purchases`, base), {
-        method: 'POST',
-        headers: {
-          origin,
-          cookie: `session=${person.token}`,
-          'x-csrf-token': person.csrf,
-          'idempotency-key': randomUUID(),
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ quantity: 1 }),
-      });
-      if (!response.ok) throw Error(`PURCHASE_${response.status}: ${await response.text()}`);
-    }),
-  );
+  for (let start = 0; start < count; start += 500) {
+    if (start > 0) await cooldown();
+    await Promise.all(
+      people.slice(start, start + 500).map(
+        (person, localIndex) =>
+          new Promise<void>((resolve, reject) => {
+            const index = start + localIndex;
+            const ticket = issueSocketTicket(key, person.session, person.id, room.id);
+            const url = new URL('/v1/realtime', base);
+            url.protocol = 'ws:';
+            url.searchParams.set('roundId', room.id);
+            url.searchParams.set('lastSeq', '0');
+            url.searchParams.set('ticket', ticket);
+            const client = new WebSocket(url, { headers: { origin } });
+            clients.push(client);
+            const timeout = setTimeout(() => reject(Error('WS_OPEN_TIMEOUT')), 15000);
+            client.once('open', () => {
+              clearTimeout(timeout);
+              resolve();
+            });
+            client.on('error', reject);
+            client.on('message', (buffer) => {
+              const event = JSON.parse(String(buffer)) as { seq: number; type: string; ts: string };
+              const previous = sequences.get(index) ?? 0;
+              if (event.seq <= previous) duplicates++;
+              else {
+                if (event.seq !== previous + 1) gaps++;
+                sequences.set(index, event.seq);
+              }
+              if (event.type === 'BALL_DRAWN')
+                latencies.push(Math.max(0, Date.now() - Date.parse(event.ts)));
+              if (event.type === 'GAME_FINISHED') finished.add(index);
+            });
+          }),
+      ),
+    );
+  }
+  if (count > 100) await cooldown();
+  for (let start = 0; start < count; start += 500) {
+    if (start > 0) await cooldown();
+    await Promise.all(
+      people.slice(start, start + 500).map(async (person) => {
+        const response = await fetch(new URL(`/v1/rounds/${room.id}/purchases`, base), {
+          method: 'POST',
+          headers: {
+            origin,
+            cookie: `session=${person.token}`,
+            'x-csrf-token': person.csrf,
+            'idempotency-key': randomUUID(),
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ quantity: 1 }),
+        });
+        if (!response.ok) throw Error(`PURCHASE_${response.status}: ${await response.text()}`);
+      }),
+    );
+  }
   await pool.query('ALTER TABLE game_rounds DISABLE TRIGGER round_rules_guard');
   try {
     await pool.query(
@@ -167,7 +181,7 @@ try {
     gaps ||
     finished.size !== count ||
     !verified.valid ||
-    balance !== (BigInt(count) * 100000n - 1500n).toString() ||
+    balance !== (BigInt(count) * (100000n - 15n)).toString() ||
     discrepancies
   )
     throw Error(
@@ -187,11 +201,10 @@ try {
     eventLatencyMs: { p50: percentile(0.5), p95: percentile(0.95), p99: percentile(0.99) },
     durationMs: Date.now() - started,
     accelerated: true,
-    scope:
-      'Single room, real PostgreSQL and Redis, 100 synthetic users on isolated CI. Draw clock accelerated; not a production capacity certification.',
+    scope: `Single room, real PostgreSQL and Redis, ${count} synthetic users and purchases on isolated CI. Arrivals paced to preserve IP limits; draw clock accelerated. Not a production capacity certification.`,
   };
   await mkdir('../../test-results', { recursive: true });
-  await writeFile('../../test-results/load-smoke.json', JSON.stringify(report, null, 2));
+  await writeFile(`../../test-results/load-smoke-${count}.json`, JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report));
 } finally {
   for (const client of clients) client.terminate();

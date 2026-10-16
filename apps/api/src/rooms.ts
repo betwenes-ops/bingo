@@ -23,7 +23,7 @@ import { roomInput } from '@bingo/protocol';
 import type { z } from 'zod';
 import { ensureVersion } from './catalog';
 import { AppError, transaction, type Tx } from './db';
-import { wallet, moveBalance, postLedger, audit, checkLimits } from './wallet';
+import { wallet, moveBalance, postLedger, audit, checkLimits, availableTreasury } from './wallet';
 
 export type Round = {
   id: string;
@@ -156,12 +156,7 @@ export async function createRound(
         "SELECT id FROM ledger_accounts WHERE reference='house' FOR UPDATE",
       )
     ).rows[0]!.id;
-    const balance = (
-      await tx.query<{ balance: string }>(
-        'SELECT COALESCE(sum(amount),0)::text AS balance FROM ledger_entries WHERE account_id=$1',
-        [house],
-      )
-    ).rows[0]!.balance;
+    const balance = await availableTreasury(tx, house);
     const amount = BigInt(input.fixedPrize!);
     if (BigInt(balance) < amount) throw new AppError('GUARANTEE_FUND_INSUFFICIENT', 409);
     await postLedger(tx, 'PRIZE_RESERVATION', id, [
@@ -423,8 +418,16 @@ export async function advanceRound(pool: pg.Pool, key: string, roundId: string) 
       await transition(tx, r.id, 'DRAWING', 'VERIFYING');
       await transition(tx, r.id, 'VERIFYING', 'SETTLING');
     }
-    for (const userId of [...new Set(cards.rows.map((c) => c.user_id))].sort())
-      await wallet(tx, userId);
+    const recipients = new Set(
+      r.rules.patterns
+        .filter((p) => !completedSet.has(p.pattern))
+        .flatMap((p) =>
+          cards.rows
+            .filter((card) => wins(card.card, p.pattern, drawn))
+            .map((card) => card.user_id),
+        ),
+    );
+    for (const userId of [...recipients].sort()) await wallet(tx, userId);
     let previousAllocation = 0n;
     for (const [index, p] of r.rules.patterns.entries()) {
       const allocation =

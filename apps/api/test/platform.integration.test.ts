@@ -679,3 +679,33 @@ describe('Filas transacionais independentes', () => {
     expect(states.rows[1]).toMatchObject({ attempts: 1, last_error: null, delivered: true });
   });
 });
+
+describe('Garantia não utiliza vendas ainda reembolsáveis', () => {
+  it('preserva taxas de salas abertas para cancelamento em vez de reservar outro prêmio', async () => {
+    const { availableTreasury } = await import('../src/wallet');
+    const id = await player('liability@example.test');
+    const house = (await pool.query("SELECT id FROM ledger_accounts WHERE reference='house'"))
+      .rows[0].id as string;
+    const free = await transaction(pool, (tx) => availableTreasury(tx, house));
+    expect(free).toBeGreaterThan(0n);
+    const held = await createRoom(
+      pool,
+      key,
+      id,
+      input({ prizePolicy: 'fixed', fixedPrize: free.toString() }),
+    );
+    const sale = await createRoom(pool, key, id, input());
+    await purchase(pool, key, id, sale.id, 1, 'refundable-liability');
+    expect(await transaction(pool, (tx) => availableTreasury(tx, house))).toBe(0n);
+    await expect(
+      createRoom(pool, key, id, input({ prizePolicy: 'fixed', fixedPrize: '1' })),
+    ).rejects.toThrow('GUARANTEE_FUND_INSUFFICIENT');
+    await controlRoom(pool, id, sale.id, 'cancel', 'Estorno de venda ainda aberta');
+    await controlRoom(pool, id, held.id, 'cancel', 'Liberação do fundo de teste');
+    expect(
+      (await pool.query('SELECT balance::text FROM wallets WHERE user_id=$1', [id])).rows[0]
+        .balance,
+    ).toBe('100000');
+    expect(await transaction(pool, (tx) => availableTreasury(tx, house))).toBe(free);
+  });
+});

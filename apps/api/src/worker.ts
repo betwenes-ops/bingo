@@ -3,7 +3,7 @@ import { Redis } from 'ioredis';
 import nodemailer from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { readConfig } from './config';
-import { database } from './db';
+import { database, AppError } from './db';
 import { advanceRound, runSchedules } from './rooms';
 import { publishEvents, deliverEmails } from './jobs';
 const config = readConfig();
@@ -36,7 +36,8 @@ const failure = (message: string, error: unknown) =>
     JSON.stringify({
       level: 'error',
       message,
-      error: error instanceof Error ? error.name : 'unknown',
+      error:
+        error instanceof AppError ? error.code : error instanceof Error ? error.name : 'unknown',
     }),
   );
 while (running) {

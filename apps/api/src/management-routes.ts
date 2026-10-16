@@ -425,7 +425,8 @@ export async function managementRoutes(server: FastifyInstance, pool: pg.Pool, c
     ]);
     reply.setCookie('session', token, {
       httpOnly: true,
-      secure: config.NODE_ENV === 'production',
+      secure:
+        config.NODE_ENV === 'production' || new URL(config.PUBLIC_WEB_URL).protocol === 'https:',
       sameSite: 'strict',
       path: '/',
       maxAge: 43200,
