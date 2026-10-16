@@ -91,7 +91,7 @@ jobs:
           docker compose exec -T postgres pg_dump -U bingo -Fc bingo > /tmp/bingo-backup.dump
           docker compose exec -T postgres createdb -U bingo restore_check
           docker compose exec -T postgres pg_restore -U bingo -d restore_check < /tmp/bingo-backup.dump
-          test "$(docker compose exec -T postgres psql -U bingo -d restore_check -Atc 'SELECT count(*) FROM schema_migrations')" = '3'
+          test "$(docker compose exec -T postgres psql -U bingo -d restore_check -Atc 'SELECT count(*) FROM schema_migrations')" = '4'
           docker compose exec -T postgres dropdb -U bingo restore_check
       - name: Capture diagnostics
         if: always()

@@ -16,12 +16,18 @@ export type Room = {
   prize_bps: number;
   min_players: number;
   sales_close_at: string;
+  opens_at?: string;
+  sales_paused?: boolean;
   commitment: string;
   players: number;
   cards: number;
   prize: string;
   current_position: number;
-  rules: { patterns: { pattern: string; bps: number }[] };
+  rules: {
+    patterns: { pattern: string; bps: number }[];
+    policy?: 'fixed' | 'proportional';
+    fixedPrize?: string;
+  };
 };
 export type CardData = { id: string; card: { variant: number; rows: (number | null)[][] } };
 export type Snapshot = {
@@ -51,6 +57,8 @@ export const messages: Record<string, string> = {
   PARTICIPATION_PAUSED: 'Sua participação está pausada ou excluída.',
   ADMIN_FORBIDDEN: 'Acesso restrito. O administrador precisa ter MFA ativo.',
   LIMIT_INCREASE_REQUIRES_COOLDOWN: 'O limite só pode ser reduzido nesta versão.',
+  API_UNAVAILABLE: 'A conexão com o servidor está indisponível. Tentaremos novamente.',
+  API_CONFIGURATION: 'O endereço do servidor ainda não foi configurado.',
   NETWORK: 'Não foi possível conectar. Tente novamente.',
 };
 export async function api<T>(path: string, options: RequestInit = {}, csrf?: string): Promise<T> {
@@ -68,7 +76,7 @@ export async function api<T>(path: string, options: RequestInit = {}, csrf?: str
   } catch {
     throw new Error(messages.NETWORK);
   }
-  const data = await response.json();
+  const data = await response.json().catch(() => ({ code: 'API_UNAVAILABLE' }));
   if (!response.ok)
     throw new Error(messages[data.code as string] ?? 'Não foi possível concluir esta ação.');
   return data as T;

@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import { RealtimeHub, issueSocketTicket, readSocketTicket } from './realtime';
 import { managementRoutes } from './management-routes';
 import { requireRole } from './operations';
 import cookie from '@fastify/cookie';
@@ -38,7 +39,21 @@ const tokenBody = z.object({ token: z.string().regex(/^[a-f0-9]{64}$/) });
 const codeBody = z.object({ code: z.string().regex(/^\d{6}$/) });
 export async function buildApp(pool: pg.Pool, config: Config) {
   const app = Fastify({
-    logger: config.NODE_ENV !== 'test',
+    logger:
+      config.NODE_ENV === 'test'
+        ? false
+        : {
+            serializers: {
+              req(request) {
+                return {
+                  method: request.method,
+                  url: request.url?.split('?')[0],
+                  hostname: request.hostname,
+                  remoteAddress: request.ip,
+                };
+              },
+            },
+          },
     bodyLimit: 16384,
     requestTimeout: 15000,
     trustProxy: false,
@@ -356,83 +371,131 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       ).rows;
     },
   );
-  // Durable WS replay is intentionally simple; batching/fan-out capacity is measured before scaling.
+  const hub = new RealtimeHub(pool, config.REDIS_URL, (error) =>
+    app.log.warn(
+      { message: error instanceof Error ? error.message : 'unknown' },
+      'Realtime fallback active',
+    ),
+  );
+  app.addHook('onClose', () => hub.close());
+  app.post(
+    '/v1/realtime/ticket',
+    { schema: { body: z.object({ roundId: z.uuid() }) } },
+    async (req) => {
+      const u = await mutation(req);
+      const exists = await pool.query('SELECT id FROM game_rounds WHERE id=$1', [req.body.roundId]);
+      if (!exists.rowCount) throw new AppError('ROUND_NOT_FOUND', 404);
+      return {
+        ticket: issueSocketTicket(config.SEED_ENCRYPTION_KEY, u.session_id, u.id, req.body.roundId),
+      };
+    },
+  );
   let connectionCount = 0;
   const perUser = new Map<string, number>();
   app.get('/v1/realtime', { websocket: true }, async (socket, req) => {
-    let userId: string | undefined;
-    let timer: ReturnType<typeof setInterval> | undefined;
+    let userId: string | undefined,
+      sessionId: string | undefined,
+      timer: ReturnType<typeof setInterval> | undefined,
+      unsubscribe: (() => void) | undefined;
     let alive = true,
-      busy = false;
-    let seq = 0;
-    let roundId = '';
+      closed = false,
+      checking = false;
     socket.on('pong', () => {
       alive = true;
     });
     socket.on('error', () => socket.close());
     socket.on('close', () => {
+      closed = true;
       if (timer) clearInterval(timer);
+      unsubscribe?.();
       if (userId) {
         connectionCount--;
-        perUser.set(userId, Math.max(0, (perUser.get(userId) ?? 1) - 1));
+        const count = (perUser.get(userId) ?? 1) - 1;
+        if (count) perUser.set(userId, count);
+        else perUser.delete(userId);
       }
     });
     try {
       if (!req.headers.origin || !config.ALLOWED_ORIGINS.split(',').includes(req.headers.origin))
         throw new AppError('ORIGIN_REJECTED');
-      const u = await current(req);
-      if (connectionCount >= 1000 || (perUser.get(u.id) ?? 0) >= 4)
-        throw new AppError('CONNECTION_LIMIT');
-      userId = u.id;
-      connectionCount++;
-      perUser.set(userId, (perUser.get(userId) ?? 0) + 1);
       const url = new URL(req.url, 'http://localhost');
-      roundId = z.uuid().parse(url.searchParams.get('roundId'));
-      seq = z.coerce
+      const roundId = z.uuid().parse(url.searchParams.get('roundId'));
+      const seq = z.coerce
         .number()
         .int()
         .min(0)
         .parse(url.searchParams.get('lastSeq') ?? 0);
-      const send = async () => {
-        if (busy || socket.readyState !== 1) return;
-        busy = true;
-        try {
-          await authenticate(pool, req.cookies.session);
-          if (socket.bufferedAmount > 1048576) {
-            socket.close(1013, 'BACKPRESSURE');
-            return;
-          }
-          const result = await pool.query(
-            'SELECT id AS "eventId",round_id AS "roundId",seq,type,created_at AS ts,payload,1 AS v FROM game_events WHERE round_id=$1 AND seq>$2 ORDER BY seq LIMIT 500',
-            [roundId, seq],
-          );
-          for (const e of result.rows) {
-            socket.send(JSON.stringify(e));
-            seq = e.seq as number;
-          }
-        } catch {
-          socket.close(1008, 'SESSION_EXPIRED');
-        } finally {
-          busy = false;
-        }
+      const ticket = url.searchParams.get('ticket');
+      const identity = ticket
+        ? readSocketTicket(config.SEED_ENCRYPTION_KEY, ticket, roundId)
+        : await current(req);
+      const uid = 'userId' in identity ? identity.userId : identity.id;
+      const sid = 'sessionId' in identity ? identity.sessionId : identity.session_id;
+      const valid = async () => {
+        const r = await pool.query(
+          'SELECT s.id FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.id=$1 AND s.user_id=$2 AND s.expires_at>now() AND NOT u.blocked',
+          [sid, uid],
+        );
+        if (!r.rowCount) throw new AppError('UNAUTHENTICATED', 401);
       };
-      await send();
-      let ticks = 0;
-      timer = setInterval(() => {
-        if (++ticks % 20 === 0) {
-          if (!alive) {
-            socket.terminate();
-            return;
-          }
-          alive = false;
-          socket.ping();
+      await valid();
+      if (closed) return;
+      if (connectionCount >= 1000 || (perUser.get(uid) ?? 0) >= 4)
+        throw new AppError('CONNECTION_LIMIT');
+      userId = uid;
+      sessionId = sid;
+      connectionCount++;
+      perUser.set(uid, (perUser.get(uid) ?? 0) + 1);
+      unsubscribe = hub.subscribe(roundId, seq, (event) => {
+        if (socket.readyState !== 1) throw Error('CLOSED');
+        if (socket.bufferedAmount > 1048576) {
+          socket.close(1013, 'BACKPRESSURE');
+          throw Error('BACKPRESSURE');
         }
-        void send();
-      }, 1000);
+        socket.send(JSON.stringify(event));
+      });
+      timer = setInterval(() => {
+        if (!alive) {
+          socket.terminate();
+          return;
+        }
+        alive = false;
+        socket.ping();
+        if (!checking) {
+          checking = true;
+          void valid()
+            .catch(() => socket.close(1008, 'SESSION_EXPIRED'))
+            .finally(() => {
+              checking = false;
+            });
+        }
+      }, 20000);
       socket.on('message', () => socket.close(1008, 'READ_ONLY_STREAM'));
     } catch {
       socket.close(1008, 'UNAUTHORIZED');
     }
+    void sessionId;
+  });
+  app.get('/v1/admin/health', async (req) => {
+    await admin(req);
+    const [workers, queue, mail, delay] = await Promise.all([
+      pool.query(
+        "SELECT instance_id,updated_at,rounds_advanced::text,updated_at>now()-interval '20 seconds' AS healthy FROM worker_heartbeats ORDER BY updated_at DESC LIMIT 20",
+      ),
+      pool.query('SELECT count(*)::int AS pending FROM outbox_events WHERE published_at IS NULL'),
+      pool.query(
+        'SELECT count(*) FILTER(WHERE delivered_at IS NULL)::int AS pending,count(*) FILTER(WHERE delivered_at IS NULL AND attempts>=12)::int AS failed FROM email_outbox',
+      ),
+      pool.query(
+        "SELECT COALESCE(EXTRACT(epoch FROM now()-min(next_ball_at)),0)::float AS seconds FROM game_rounds WHERE state='DRAWING' AND next_ball_at<now()",
+      ),
+    ]);
+    return {
+      workers: workers.rows,
+      outbox: queue.rows[0],
+      email: mail.rows[0],
+      scheduler: delay.rows[0],
+    };
   });
   app.get('/v1/admin/summary', async (req) => {
     await admin(req);

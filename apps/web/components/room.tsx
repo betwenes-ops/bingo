@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { ArrowLeft, ShieldCheck, Wifi, Plus, Minus, Layers, Box, Check } from 'lucide-react';
+import { remaining, type Card, type Pattern } from '@bingo/domain';
+import { eventEnvelope } from '@bingo/protocol';
 import { verifyDraw, sha256 } from '../lib/verifier';
 import {
   api,
@@ -35,57 +37,129 @@ export function Room({
     [three, setThree] = useState(false),
     [verification, setVerification] = useState('');
   const key = useRef<string | null>(null);
+  const cursor = useRef(0);
   const load = useCallback(async () => {
     try {
-      setData(await api<Snapshot>(`/v1/rounds/${room.id}`));
+      const snapshot = await api<Snapshot>(`/v1/rounds/${room.id}`);
+      cursor.current = Math.max(cursor.current, snapshot.round.event_seq);
+      setData((previous) =>
+        previous && previous.round.event_seq > snapshot.round.event_seq ? previous : snapshot,
+      );
       setError('');
     } catch (e) {
       setError((e as Error).message);
     }
   }, [room.id]);
   useEffect(() => {
-    void load();
+    cursor.current = 0;
     let stopped = false,
       socket: WebSocket | undefined,
-      timer: ReturnType<typeof setTimeout> | undefined;
-    let delay = 500;
-    const connect = () => {
+      timer: ReturnType<typeof setTimeout> | undefined,
+      delay = 500;
+    const connect = async () => {
       if (stopped) return;
-      const base =
-        process.env.NEXT_PUBLIC_WS_URL ??
-        `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/api/v1/realtime`;
-      socket = new WebSocket(`${base}?roundId=${room.id}&lastSeq=0`);
-      socket.onopen = () => {
-        setConnected(true);
-        delay = 500;
-        void load();
-      };
-      let refreshing = false;
-      socket.onmessage = () => {
-        if (refreshing) return;
-        refreshing = true;
-        void load().finally(() => {
-          refreshing = false;
-        });
-        onBalance();
-      };
-      socket.onclose = () => {
+      try {
+        const [settings, credentials] = await Promise.all([
+          fetch('/api/connection', { cache: 'no-store' }).then(async (r) => {
+            if (!r.ok) throw Error('API_UNAVAILABLE');
+            return r.json() as Promise<{ webSocketUrl: string }>;
+          }),
+          api<{ ticket: string }>(
+            '/v1/realtime/ticket',
+            { method: 'POST', body: JSON.stringify({ roundId: room.id }) },
+            user.csrfToken,
+          ),
+        ]);
+        if (stopped) return;
+        const url = new URL(settings.webSocketUrl);
+        url.searchParams.set('roundId', room.id);
+        url.searchParams.set('lastSeq', String(cursor.current));
+        url.searchParams.set('ticket', credentials.ticket);
+        socket = new WebSocket(url);
+        socket.onopen = () => {
+          setConnected(true);
+          delay = 500;
+          void load();
+        };
+        socket.onmessage = (message) => {
+          try {
+            const event = eventEnvelope.parse(JSON.parse(String(message.data)));
+            if (event.roundId !== room.id || event.seq <= cursor.current) return;
+            if (event.seq !== cursor.current + 1) {
+              void load();
+              return;
+            }
+            cursor.current = event.seq;
+            setData((previous) => {
+              if (!previous || event.seq <= previous.round.event_seq) return previous;
+              const round = { ...previous.round, event_seq: event.seq };
+              if (event.type === 'STATE_CHANGED' && typeof event.payload.to === 'string')
+                round.state = event.payload.to;
+              if (
+                event.type === 'BALL_DRAWN' &&
+                typeof event.payload.number === 'number' &&
+                typeof event.payload.position === 'number'
+              )
+                return {
+                  ...previous,
+                  round: { ...round, current_position: event.payload.position },
+                  balls: [
+                    ...previous.balls,
+                    { number: event.payload.number, position: event.payload.position },
+                  ],
+                };
+              return { ...previous, round };
+            });
+            if (
+              ['PATTERN_COMPLETED', 'GAME_FINISHED', 'GAME_CANCELLED', 'CARD_PURCHASED'].includes(
+                event.type,
+              )
+            ) {
+              void load();
+              onBalance();
+            }
+          } catch {
+            void load();
+          }
+        };
+        socket.onclose = () => {
+          setConnected(false);
+          if (!stopped) {
+            timer = setTimeout(() => void connect(), delay);
+            delay = Math.min(delay * 2, 15000);
+          }
+        };
+        socket.onerror = () => socket?.close();
+      } catch {
         setConnected(false);
         if (!stopped) {
-          timer = setTimeout(connect, delay);
+          timer = setTimeout(() => void connect(), delay);
           delay = Math.min(delay * 2, 15000);
         }
-      };
+      }
     };
-    connect();
-    const polling = setInterval(() => void load(), 5000);
+    void load().then(() => connect());
+    const polling = setInterval(() => {
+      if (socket?.readyState !== WebSocket.OPEN) void load();
+    }, 5000);
+    const resume = () => {
+      if (document.visibilityState === 'visible') {
+        void load();
+        if (!socket || socket.readyState === WebSocket.CLOSED) {
+          if (timer) clearTimeout(timer);
+          void connect();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', resume);
     return () => {
       stopped = true;
       clearInterval(polling);
       if (timer) clearTimeout(timer);
       socket?.close();
+      document.removeEventListener('visibilitychange', resume);
     };
-  }, [room.id, load, onBalance]);
+  }, [room.id, load, onBalance, user.csrfToken]);
   async function buy() {
     setBusy(true);
     setError('');
@@ -215,7 +289,7 @@ export function Room({
               {data?.cards.length ?? 0} / {r.max_cards}
             </span>
           </div>
-          {r.state === 'OPEN_FOR_SALES' && (
+          {r.state === 'OPEN_FOR_SALES' && !r.sales_paused && (
             <div className="purchase-box">
               <div>
                 <span>Por cartela</span>
@@ -256,8 +330,10 @@ export function Room({
                   : `Comprar · ${credits((BigInt(r.price) * BigInt(quantity)).toString())} créditos`}
               </button>
               <small>
-                Prêmios: {r.prize_bps / 100}% de cada compra, arredondados para baixo ao centésimo
-                de crédito. Empates dividem o prêmio.
+                {r.rules.policy === 'fixed'
+                  ? `Prêmio fixo reservado: ${credits(r.rules.fixedPrize)} créditos.`
+                  : `Prêmios: ${r.prize_bps / 100}% de cada compra, arredondados para baixo ao centésimo de crédito.`}{' '}
+                Empates dividem o prêmio.
               </small>
             </div>
           )}
@@ -268,9 +344,18 @@ export function Room({
               <p>Compre uma cartela enquanto as inscrições estiverem abertas.</p>
             </div>
           )}
+          {r.sales_paused && <p role="status">As vendas desta sala estão pausadas.</p>}
           <div className="card-list">
             {data?.cards.map((c, index) => (
               <article className="bingo-card" key={c.id}>
+                <p className="card-proximity">
+                  {Math.min(
+                    ...r.rules.patterns.map((p) =>
+                      remaining(c.card as Card, p.pattern as Pattern, balls),
+                    ),
+                  )}{' '}
+                  bolas para o padrão mais próximo
+                </p>
                 <div className="card-label">
                   CARTELA {String(index + 1).padStart(2, '0')}
                   <span>{c.id.slice(0, 8)}</span>

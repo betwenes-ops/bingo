@@ -90,7 +90,7 @@ afterAll(async () => {
 describe('PostgreSQL real: identidade, integridade e recuperação', () => {
   it('migrações são idempotentes', async () => {
     await migrate(pool);
-    expect((await pool.query('SELECT * FROM schema_migrations')).rowCount).toBe(3);
+    expect((await pool.query('SELECT * FROM schema_migrations')).rowCount).toBe(4);
   });
   it('confirmação concede créditos uma única vez e recuperação revoga sessões', async () => {
     const id = await player('identity@example.test');
@@ -593,7 +593,7 @@ describe('Schema privado para hospedagem gerenciada', () => {
       expect((await scoped.query('SELECT current_schema() AS schema')).rows[0].schema).toBe(
         'bingo_isolation_test',
       );
-      expect((await scoped.query('SELECT * FROM schema_migrations')).rowCount).toBe(3);
+      expect((await scoped.query('SELECT * FROM schema_migrations')).rowCount).toBe(4);
       expect((await scoped.query('SELECT count(*)::int AS count FROM users')).rows[0].count).toBe(
         0,
       );
@@ -607,5 +607,75 @@ describe('Schema privado para hospedagem gerenciada', () => {
       await scoped.end();
       await pool.query('DROP SCHEMA bingo_isolation_test CASCADE');
     }
+  });
+});
+
+describe('Tempo real com credencial efêmera e replay', () => {
+  it('conecta sem cookie entre domínios, recupera eventos e rejeita sessão revogada', async () => {
+    const { default: WebSocket } = await import('ws');
+    const id = await player('socket@example.test');
+    const session = await login(pool, 'socket@example.test', 'test-password-1234', key);
+    const room = await createRoom(pool, key, id, input());
+    const issued = await app.inject({
+      method: 'POST',
+      url: '/v1/realtime/ticket',
+      cookies: { session: session.token },
+      headers: { origin, 'x-csrf-token': session.csrf },
+      payload: { roundId: room.id },
+    });
+    expect(issued.statusCode).toBe(200);
+    const address = await app.listen({ port: 0, host: '127.0.0.1' });
+    const endpoint =
+      address.replace('http:', 'ws:') +
+      `/v1/realtime?roundId=${room.id}&lastSeq=0&ticket=${encodeURIComponent(issued.json().ticket)}`;
+    const socket = new WebSocket(endpoint, { headers: { origin } });
+    const seen: number[] = [];
+    const event = await new Promise<{ type: string; seq: number }>((resolve, reject) => {
+      const timer = setTimeout(() => reject(Error('WS_REPLAY_TIMEOUT')), 10000);
+      socket.on('error', reject);
+      socket.on('message', (buffer) => {
+        const message = JSON.parse(String(buffer));
+        seen.push(message.seq);
+        if (message.type === 'ROOM_OPENED') {
+          clearTimeout(timer);
+          resolve(message);
+        }
+      });
+    });
+    expect(event.type).toBe('ROOM_OPENED');
+    expect(seen).toEqual([...seen].sort((a, b) => a - b));
+    socket.close();
+    await pool.query('DELETE FROM user_sessions WHERE user_id=$1', [id]);
+    const denied = new WebSocket(endpoint, { headers: { origin } });
+    const [code] = await once(denied, 'close');
+    expect(code).toBe(1008);
+  });
+});
+
+describe('Filas transacionais independentes', () => {
+  it('uma falha de e-mail agenda retentativa sem bloquear as demais mensagens', async () => {
+    const { deliverEmails } = await import('../src/jobs');
+    const a = await pool.query(
+      "INSERT INTO email_outbox(recipient,subject,body) VALUES('retry-a@invalid.example','Teste','Conteúdo'),('retry-b@invalid.example','Teste','Conteúdo') RETURNING id",
+    );
+    await pool.query(
+      "UPDATE email_outbox SET next_attempt_at=now()+interval '1 day' WHERE id<>ALL($1::uuid[])",
+      [a.rows.map((r) => r.id)],
+    );
+    const delivered = await deliverEmails(pool, async (email) => {
+      if (email.recipient === 'retry-a@invalid.example') throw Error('SMTP unavailable');
+    });
+    expect(delivered).toBe(1);
+    const states = await pool.query(
+      'SELECT recipient,attempts,last_error,delivered_at IS NOT NULL AS delivered,next_attempt_at>now() AS delayed FROM email_outbox WHERE id=ANY($1::uuid[]) ORDER BY recipient',
+      [a.rows.map((r) => r.id)],
+    );
+    expect(states.rows[0]).toMatchObject({
+      attempts: 1,
+      last_error: 'DELIVERY_FAILED',
+      delivered: false,
+      delayed: true,
+    });
+    expect(states.rows[1]).toMatchObject({ attempts: 1, last_error: null, delivered: true });
   });
 });
