@@ -1,0 +1,148 @@
+.admin-badge {
+  font-size: 8px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.admin-welcome {
+  padding-top: 90px;
+  max-width: 1000px;
+}
+.admin-welcome h1 {
+  font-size: 64px;
+}
+.admin-welcome p {
+  max-width: 500px;
+}
+.restricted-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 80px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.restricted-note svg {
+  color: var(--gold);
+}
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin: 10px 0 25px;
+}
+.admin-stats > div {
+  padding: 25px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.admin-stats span {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.admin-stats strong {
+  display: block;
+  color: var(--light-gold);
+  font-size: 39px;
+  font-weight: 500;
+  letter-spacing: -1px;
+  margin-top: 15px;
+}
+.reconciliation {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+}
+.reconciliation p {
+  margin-bottom: 8px;
+}
+.reconciliation span {
+  font-size: 10px;
+  color: var(--muted);
+}
+.room-form {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 20px;
+  margin-bottom: 25px;
+}
+.room-form > p {
+  grid-column: 1/-1;
+  font-size: 10px;
+  margin-top: 15px;
+}
+.room-form > button {
+  grid-column: 1/-1;
+}
+@media (max-width: 1000px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-stats strong {
+    font-size: 30px;
+  }
+  .reconciliation {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 680px) {
+  .admin-badge {
+    display: none;
+  }
+  .admin-welcome {
+    padding-top: 50px;
+  }
+  .admin-welcome h1 {
+    font-size: 40px;
+  }
+  .admin-stats {
+    gap: 10px;
+  }
+  .admin-stats > div {
+    padding: 17px;
+  }
+  .admin-stats span {
+    font-size: 6px;
+  }
+  .admin-stats strong {
+    font-size: 29px;
+  }
+  .room-form {
+    grid-template-columns: 1fr;
+  }
+  .admin-welcome .primary {
+    margin-top: 20px;
+  }
+  .shell .sidebar {
+    display: flex;
+    position: static;
+    width: auto;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 16px;
+  }
+  .shell .sidebar nav {
+    display: flex;
+    gap: 7px;
+    overflow: auto;
+  }
+  .shell .sidebar nav button {
+    min-width: 120px;
+    min-height: 44px;
+    font-size: 9px;
+    padding: 8px;
+    gap: 5px;
+  }
+  .shell .sidebar .sidebar-label,
+  .shell .sidebar .sidebar-note {
+    display: none;
+  }
+}

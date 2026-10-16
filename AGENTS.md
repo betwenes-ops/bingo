@@ -1,6 +1,6 @@
 # Instruções do projeto
 
-Leia PROJECT_BRIEF.md inteiro e docs/adr antes de alterar o projeto. O briefing é a fonte da verdade. Não avance de fase sem relatório e aprovação.
+Leia PROJECT_BRIEF.md inteiro e docs/adr antes de alterar o projeto. O briefing é a fonte da verdade. O usuário autorizou em 2026-10-16 a execução autônoma sem novas aprovações. Continue com relatórios honestos e validações; decisões reversíveis não exigem nova confirmação. Dinheiro real permanece fora do escopo.
 
 ## 2. PRINCÍPIOS INEGOCIÁVEIS
 
@@ -15,32 +15,30 @@ Leia PROJECT_BRIEF.md inteiro e docs/adr antes de alterar o projeto. O briefing 
 9. **Sem dados fictícios apresentados como reais** (contadores de jogadores, prêmios, partidas). Seeds de demonstração devem ser claramente marcados como tais no ambiente de demo.
 10. **Degradação elegante.** O jogo funciona integralmente sem 3D e sem som; efeitos se reduzem automaticamente em aparelhos fracos.
 
-
 ## 4. STACK (DECIDIDA — NÃO ALTERNAR SEM ADR)
 
-| Camada | Escolha |
-|---|---|
-| Monorepo | pnpm workspaces + Turborepo |
-| Linguagem | TypeScript estrito (`strict`, `noUncheckedIndexedAccess`) em tudo |
-| Frontend jogador | Next.js (App Router) + React + Tailwind CSS |
-| Cenas 3D | Three.js (procedural, sem depender de modelos externos pesados) |
-| 2D acelerado / partículas | PixiJS quando fizer sentido |
-| Animação UI | Framer Motion (UI) e GSAP (sequências cinematográficas) |
-| Áudio | Howler.js |
-| Backend | Node.js + Fastify, validação com Zod, OpenAPI gerada das rotas |
-| Tempo real | WebSocket (`ws`) com protocolo próprio versionado; Redis pub/sub para múltiplas instâncias |
-| Banco | PostgreSQL 16+ com migrações versionadas (Drizzle ou Prisma — escolher e registrar ADR) |
-| Cache/presença/coordenação | Redis |
-| Filas/jobs | BullMQ (Redis) ou equivalente; **outbox transacional** para eventos críticos |
-| E-mail | Mailpit em desenvolvimento; provedor transacional configurável em demo |
-| Anti-bot | Cloudflare Turnstile (com bypass configurável em dev/teste) |
-| MFA | TOTP (RFC 6238) |
-| Testes | Vitest (unidade/integração), Testcontainers (Postgres/Redis reais), Playwright (e2e + screenshots), k6 (carga), fast-check (propriedades) |
-| Observabilidade | Pino (logs JSON), OpenTelemetry, Prometheus + Grafana |
-| Contêineres | Docker; `docker compose up` sobe o ambiente local completo com um comando |
-| CI | GitHub Actions: lint, typecheck, testes, build, auditoria de dependências |
-| Deploy da demo | Containers para serviços persistentes (API + WebSocket + workers), CDN para estáticos. **Não** hospedar o motor de partidas em funções serverless stateless. Escolher provedor por custo/latência e registrar ADR. |
-
+| Camada                     | Escolha                                                                                                                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Monorepo                   | pnpm workspaces + Turborepo                                                                                                                                                                                        |
+| Linguagem                  | TypeScript estrito (`strict`, `noUncheckedIndexedAccess`) em tudo                                                                                                                                                  |
+| Frontend jogador           | Next.js (App Router) + React + Tailwind CSS                                                                                                                                                                        |
+| Cenas 3D                   | Three.js (procedural, sem depender de modelos externos pesados)                                                                                                                                                    |
+| 2D acelerado / partículas  | PixiJS quando fizer sentido                                                                                                                                                                                        |
+| Animação UI                | Framer Motion (UI) e GSAP (sequências cinematográficas)                                                                                                                                                            |
+| Áudio                      | Howler.js                                                                                                                                                                                                          |
+| Backend                    | Node.js + Fastify, validação com Zod, OpenAPI gerada das rotas                                                                                                                                                     |
+| Tempo real                 | WebSocket (`ws`) com protocolo próprio versionado; Redis pub/sub para múltiplas instâncias                                                                                                                         |
+| Banco                      | PostgreSQL 16+ com migrações versionadas (Drizzle ou Prisma — escolher e registrar ADR)                                                                                                                            |
+| Cache/presença/coordenação | Redis                                                                                                                                                                                                              |
+| Filas/jobs                 | BullMQ (Redis) ou equivalente; **outbox transacional** para eventos críticos                                                                                                                                       |
+| E-mail                     | Mailpit em desenvolvimento; provedor transacional configurável em demo                                                                                                                                             |
+| Anti-bot                   | Cloudflare Turnstile (com bypass configurável em dev/teste)                                                                                                                                                        |
+| MFA                        | TOTP (RFC 6238)                                                                                                                                                                                                    |
+| Testes                     | Vitest (unidade/integração), Testcontainers (Postgres/Redis reais), Playwright (e2e + screenshots), k6 (carga), fast-check (propriedades)                                                                          |
+| Observabilidade            | Pino (logs JSON), OpenTelemetry, Prometheus + Grafana                                                                                                                                                              |
+| Contêineres                | Docker; `docker compose up` sobe o ambiente local completo com um comando                                                                                                                                          |
+| CI                         | GitHub Actions: lint, typecheck, testes, build, auditoria de dependências                                                                                                                                          |
+| Deploy da demo             | Containers para serviços persistentes (API + WebSocket + workers), CDN para estáticos. **Não** hospedar o motor de partidas em funções serverless stateless. Escolher provedor por custo/latência e registrar ADR. |
 
 ## 28. QUANDO PEDIR APROVAÇÃO
 

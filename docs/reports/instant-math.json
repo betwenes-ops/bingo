@@ -1,0 +1,30 @@
+{
+  "version": "instant-75-v1",
+  "trials": 1000000,
+  "stake": "100",
+  "seed": "0909090909090909090909090909090909090909090909090909090909090909",
+  "rng": "hmac-sha256-fy-v1 continuous stream; partial Fisher-Yates 30/75",
+  "method": "Exact inclusion-exclusion over 15 pattern masks; disjoint classes by highest paying completed pattern",
+  "payoutBps": {
+    "line": 38993,
+    "column": 38993,
+    "diagonal": 77986,
+    "corners": 116979,
+    "x": 389930,
+    "full": 7798600
+  },
+  "theoreticalRtp": 0.9486071910554115,
+  "simulatedRtp": 0.94437501,
+  "confidence95": [0.9394111325415594, 0.9493388874584406],
+  "withinConfidence95": true,
+  "hitRate": 0.156609,
+  "varianceInCreditUnits": 64140.14843402343,
+  "distribution": {
+    "0": 843391,
+    "389": 95226,
+    "779": 39080,
+    "1169": 21981,
+    "3899": 322
+  },
+  "durationMs": 100268
+}

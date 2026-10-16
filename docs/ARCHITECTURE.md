@@ -23,22 +23,22 @@ Estrutura: apps/{web,admin,api}; packages/{domain,bingo-math,protocol,ui,scene3d
 
 ## Fronteiras e contratos internos
 
-| Módulo | Responsabilidade e interface pública prevista |
-|---|---|
-| identity | register, verifyEmail, authenticate, rotateSession, revokeSession, requireMfa; Argon2id, cookies seguros, tokens de uso único armazenados por hash |
-| wallet | postBalancedTransaction, reserve, release, reconcile; exige contexto transacional e chave idempotente |
-| catalog | publishVersion, getPublishedRules; versões publicadas imutáveis |
-| rng | commit, deriveSequence, reveal, verify; algoritmo e serialização versionados |
-| cards | generateCard, validateCard, evaluatePatterns por modalidade |
-| prizes | allocatePool, splitTies, evaluateAwards; inteiros e resto determinístico |
-| rooms | purchaseCards, closeSales, advanceRound, cancelBeforeDraw; máquina de estados persistida |
-| instant | playAndSettle; débito, resultado e crédito na mesma transação |
-| realtime | authorizeSubscription, replay, snapshot; cursor por partida |
-| admin | comandos autorizados, motivo, dupla aprovação; sem editar resultados |
-| audit | appendAudit; apenas inserção com ator e correlação |
-| compliance | checkParticipation, pause, selfExclude; verificado em cada compra |
-| payments | interface e adaptador indisponível; qualquer chamada retorna operação desativada |
-| notifications | entrega in-app e e-mail por eventos idempotentes |
+| Módulo        | Responsabilidade e interface pública prevista                                                                                                      |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| identity      | register, verifyEmail, authenticate, rotateSession, revokeSession, requireMfa; Argon2id, cookies seguros, tokens de uso único armazenados por hash |
+| wallet        | postBalancedTransaction, reserve, release, reconcile; exige contexto transacional e chave idempotente                                              |
+| catalog       | publishVersion, getPublishedRules; versões publicadas imutáveis                                                                                    |
+| rng           | commit, deriveSequence, reveal, verify; algoritmo e serialização versionados                                                                       |
+| cards         | generateCard, validateCard, evaluatePatterns por modalidade                                                                                        |
+| prizes        | allocatePool, splitTies, evaluateAwards; inteiros e resto determinístico                                                                           |
+| rooms         | purchaseCards, closeSales, advanceRound, cancelBeforeDraw; máquina de estados persistida                                                           |
+| instant       | playAndSettle; débito, resultado e crédito na mesma transação                                                                                      |
+| realtime      | authorizeSubscription, replay, snapshot; cursor por partida                                                                                        |
+| admin         | comandos autorizados, motivo, dupla aprovação; sem editar resultados                                                                               |
+| audit         | appendAudit; apenas inserção com ator e correlação                                                                                                 |
+| compliance    | checkParticipation, pause, selfExclude; verificado em cada compra                                                                                  |
+| payments      | interface e adaptador indisponível; qualquer chamada retorna operação desativada                                                                   |
+| notifications | entrega in-app e e-mail por eventos idempotentes                                                                                                   |
 
 Módulos só importam interfaces públicas, verificados por lint de fronteiras. A unidade de trabalho PostgreSQL pertence à camada de aplicação para compor carteira, compra e outbox atomicamente, sem cada serviço abrir transações independentes.
 

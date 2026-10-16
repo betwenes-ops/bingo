@@ -1,0 +1,94 @@
+x-app: &app
+  build: .
+  env_file: .env
+  environment: &environment
+    NODE_ENV: development
+    DATABASE_URL: postgresql://bingo:local-demo-only@postgres:5432/bingo
+    REDIS_URL: redis://redis:6379
+    SMTP_URL: smtp://mailpit:1025
+    API_INTERNAL_URL: http://api:4000
+    TURNSTILE_BYPASS: 'true'
+    REAL_MONEY_ENABLED: 'false'
+  restart: unless-stopped
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bingo
+      POSTGRES_PASSWORD: local-demo-only
+      POSTGRES_DB: bingo
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U bingo -d bingo]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    command: [redis-server, --appendonly, 'yes']
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports: ['127.0.0.1:8025:8025']
+  migrate:
+    <<: *app
+    restart: 'no'
+    command:
+      [
+        sh,
+        -c,
+        'pnpm db:migrate && pnpm --filter @bingo/api exec node --import tsx src/provision-local-role.ts',
+      ]
+    depends_on:
+      postgres: { condition: service_healthy }
+  api:
+    <<: *app
+    environment:
+      <<: *environment
+      DATABASE_URL: postgresql://bingo_app:local-app-only@postgres:5432/bingo
+    command: [pnpm, --filter, '@bingo/api', start]
+    ports: ['127.0.0.1:4000:4000']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://localhost:4000/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  worker:
+    <<: *app
+    environment:
+      <<: *environment
+      DATABASE_URL: postgresql://bingo_app:local-app-only@postgres:5432/bingo
+    command: [pnpm, --filter, '@bingo/api', worker]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+      mailpit: { condition: service_started }
+  web:
+    <<: *app
+    ports: ['127.0.0.1:3000:3000']
+    command: [pnpm, --filter, '@bingo/web', start]
+    depends_on:
+      api: { condition: service_healthy }
+  admin:
+    <<: *app
+    ports: ['127.0.0.1:3001:3001']
+    command: [pnpm, --filter, '@bingo/admin', start]
+    depends_on:
+      api: { condition: service_healthy }
+volumes:
+  postgres-data:
+  redis-data:

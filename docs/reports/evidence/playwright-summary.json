@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "actualWorkers": 1
+  },
+  "startTime": 1792156457459,
+  "duration": 20079.159,
+  "files": [
+    {
+      "fileId": "07743df4f35bb054ea2e",
+      "fileName": "interface.spec.ts",
+      "tests": [
+        {
+          "testId": "07743df4f35bb054ea2e-39efd959902407410672",
+          "title": "lobby acess\u00edvel, sem contadores inventados e sem transbordar no celular",
+          "projectName": "desktop",
+          "location": {
+            "file": "interface.spec.ts",
+            "line": 2,
+            "column": 1
+          },
+          "duration": 5265,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": [],
+          "ok": true,
+          "results": [
+            {
+              "attachments": [],
+              "startTime": "2026-10-16T13:14:24.132Z",
+              "workerIndex": 0
+            }
+          ]
+        },
+        {
+          "testId": "07743df4f35bb054ea2e-3323a162b4a883aff3fb",
+          "title": "admin exige autentica\u00e7\u00e3o e mant\u00e9m demonstra\u00e7\u00e3o vis\u00edvel",
+          "projectName": "desktop",
+          "location": {
+            "file": "interface.spec.ts",
+            "line": 25,
+            "column": 1
+          },
+          "duration": 741,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": [],
+          "ok": true,
+          "results": [
+            {
+              "attachments": [],
+              "startTime": "2026-10-16T13:14:29.483Z",
+              "workerIndex": 0
+            }
+          ]
+        },
+        {
+          "testId": "07743df4f35bb054ea2e-f91d09c5a7af72ccafb9",
+          "title": "lobby acess\u00edvel, sem contadores inventados e sem transbordar no celular",
+          "projectName": "mobile",
+          "location": {
+            "file": "interface.spec.ts",
+            "line": 2,
+            "column": 1
+          },
+          "duration": 5363,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": [],
+          "ok": true,
+          "results": [
+            {
+              "attachments": [],
+              "startTime": "2026-10-16T13:14:30.831Z",
+              "workerIndex": 1
+            }
+          ]
+        },
+        {
+          "testId": "07743df4f35bb054ea2e-9f761e680962472fa789",
+          "title": "admin exige autentica\u00e7\u00e3o e mant\u00e9m demonstra\u00e7\u00e3o vis\u00edvel",
+          "projectName": "mobile",
+          "location": {
+            "file": "interface.spec.ts",
+            "line": 25,
+            "column": 1
+          },
+          "duration": 1084,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": [],
+          "ok": true,
+          "results": [
+            {
+              "attachments": [],
+              "startTime": "2026-10-16T13:14:36.281Z",
+              "workerIndex": 1
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total": 4,
+        "expected": 4,
+        "unexpected": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "ok": true
+      }
+    }
+  ],
+  "projectNames": ["desktop", "mobile"],
+  "stats": {
+    "total": 4,
+    "expected": 4,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "ok": true
+  },
+  "errors": [],
+  "options": {},
+  "machines": []
+}

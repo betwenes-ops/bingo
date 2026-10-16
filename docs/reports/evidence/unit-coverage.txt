@@ -1,0 +1,25 @@
+$ vitest run --coverage
+
+ RUN  v5.0.4 /workspace/scratch/ed29892562f0/bingo
+      Coverage enabled with v8
+
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  08:16:59
+   Duration  7.78s (tests 86%, import 10%, transform 2%, worker 1%)
+
+ % Coverage report from v8
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |   99.33 |    99.21 |     100 |     100 |                   
+ index.ts |   99.15 |     99.1 |     100 |     100 | 77                
+----------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 99.33% ( 149/150 )
+Branches     : 99.21% ( 127/128 )
+Functions    : 100% ( 44/44 )
+Lines        : 100% ( 114/114 )
+================================================================================
