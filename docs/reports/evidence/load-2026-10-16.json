@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-16",
+  "commit": "f8e3756df96dc376a921b4618c0fee1b9fc850b5",
+  "workflow": "https://github.com/betwenes-ops/bingo/actions/runs/38962117984",
+  "tests": {
+    "unit": 31,
+    "postgres": 23,
+    "browser": 10
+  },
+  "load": [
+    {
+      "participants": 100,
+      "completedClients": 100,
+      "ballDeliveries": 6100,
+      "duplicates": 0,
+      "gaps": 0,
+      "financialDiscrepancies": 0,
+      "proofValid": true,
+      "eventLatencyMs": {
+        "p50": 12,
+        "p95": 29,
+        "p99": 212
+      },
+      "durationMs": 2652,
+      "accelerated": true,
+      "scope": "Single room, real PostgreSQL and Redis, 100 synthetic users and purchases on isolated CI. Arrivals paced to preserve IP limits; draw clock accelerated. Not a production capacity certification."
+    },
+    {
+      "participants": 500,
+      "completedClients": 500,
+      "ballDeliveries": 30000,
+      "duplicates": 0,
+      "gaps": 0,
+      "financialDiscrepancies": 0,
+      "proofValid": true,
+      "eventLatencyMs": {
+        "p50": 30,
+        "p95": 132,
+        "p99": 331
+      },
+      "durationMs": 77587,
+      "accelerated": true,
+      "scope": "Single room, real PostgreSQL and Redis, 500 synthetic users and purchases on isolated CI. Arrivals paced to preserve IP limits; draw clock accelerated. Not a production capacity certification."
+    },
+    {
+      "participants": 1000,
+      "completedClients": 1000,
+      "ballDeliveries": 56000,
+      "duplicates": 0,
+      "gaps": 0,
+      "financialDiscrepancies": 0,
+      "proofValid": true,
+      "eventLatencyMs": {
+        "p50": 50,
+        "p95": 349,
+        "p99": 559
+      },
+      "durationMs": 225296,
+      "accelerated": true,
+      "scope": "Single room, real PostgreSQL and Redis, 1000 synthetic users and purchases on isolated CI. Arrivals paced to preserve IP limits; draw clock accelerated. Not a production capacity certification."
+    }
+  ]
+}

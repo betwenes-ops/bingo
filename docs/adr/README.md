@@ -8,3 +8,5 @@
 - [0006 — Orçamento inicial de frontend](0006-orcamento-visual.md)
 - [0007 — Revisão documental antes da fundação executável](0007-gates.md)
 - [0008 — Autonomia e implementação inicial](0008-autonomia-e-implementacao-inicial.md)
+
+- [0009 — Hospedagem existente e configuração em runtime](0009-hospedagem-e-runtime.md)

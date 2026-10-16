@@ -1,26 +1,28 @@
 # Estado verificável da entrega
 
-Atualizado em 2026-10-16. [CI verde do código](https://github.com/betwenes-ops/bingo/actions/runs/38920267692), commit 27baa53bddb855e2c597d25a6ea9f316959d0c54.
+Atualizado em 2026-10-16. [Bateria integral aprovada](https://github.com/betwenes-ops/bingo/actions/runs/38962117984), commit `f8e3756df96dc376a921b4618c0fee1b9fc850b5`: **64 testes e carga progressiva até 1.000 clientes**, incluindo proteção de valores reembolsáveis e isolamento do schema Supabase. As correções posteriores da porta de runtime também foram verificadas com inicialização HTTP real e deploy público.
 
-| Verificação executada                                  | Resultado                                              |
-| ------------------------------------------------------ | ------------------------------------------------------ |
-| Instalação por lockfile, formatação, lint e TypeScript | Passou                                                 |
-| Domínio, matemática, HTTP e verificador independente   | 24 testes passaram                                     |
-| PostgreSQL real/Testcontainers                         | 20 testes passaram                                     |
-| Navegador: desktop e celular, incluindo jogo completo  | 6 testes passaram                                      |
-| Build das aplicações/pacotes                           | Passou                                                 |
-| Auditoria de dependências                              | Sem vulnerabilidades conhecidas na execução registrada |
-| Compose API/web/admin e backup/restauração             | Passou                                                 |
-| Matemática exata × 1.000.000 de simulações             | Compatível com IC95%                                   |
+| Verificação executada                                     | Resultado integral aprovado                       |
+| --------------------------------------------------------- | ------------------------------------------------- |
+| Instalação por lockfile, formatação, lint e TypeScript    | Passou                                            |
+| Domínio, matemática, HTTP, segurança e proxy              | 31 testes passaram                                |
+| PostgreSQL real/Testcontainers                            | 23 testes passaram                                |
+| Navegador desktop/celular                                 | 10 testes passaram                                |
+| Build, Compose e restauração estrutural                   | Passou                                            |
+| Auditoria de dependências                                 | Sem vulnerabilidades conhecidas nessa execução    |
+| Carga isolada de 100, 500 e 1.000 clientes WS com compras | Sem lacunas, duplicação ou divergência financeira |
+| Matemática exata × 1.000.000 de simulações                | Compatível com IC95% no relatório existente       |
 
-A demonstração permite cadastro, confirmação, login, créditos fictícios, compra, sorteio, premiação, carteira e verificação. O bingo individual liquida antes da animação e publica tabela/probabilidades. O admin exige MFA e oferece salas, usuários, auditoria, conciliação e dupla aprovação financeira. Há versões imutáveis, prêmio fixo reservado, estornos, estados completos, agendamento/recorrência e APIs de suporte/privacidade. O perfil oferece histórico, atendimento e download de dados.
+O navegador testa jogo completo, MFA administrativo, recorrência, aprovação financeira por segunda pessoa e recuperação offline. Redis já participa do fan-out com replay durável; a página usa conexão WSS direta com ticket temporário. Existem interfaces de operação, suporte, segurança/privacidade, sessões, notificações, PWA offline, áudio opcional e qualidade gráfica adaptativa. Fundos de prêmios fixos são reservados sem comprometer valores ainda reembolsáveis de outras rodadas.
 
-O Compose completo e uma restauração estrutural de backup passaram em CI. Dinheiro real, deploy público, carga progressiva, observabilidade completa, fan-out Redis no gateway, interfaces de todos os controles e acabamento integral continuam pendentes. O teste de navegador ainda não cobre todos os novos formulários administrativos. Os relatórios fase-0.md até fase-8.md descrevem gates abertos. O projeto não está certificado e não foi medida capacidade de 10.000 jogadores.
+## Hospedagem observada
 
-[Relatório desta continuação](reports/operations-2026-10-16.md) · [Guia de operação](operations.md).
+[Jogador público](https://bingoweb-production-8b1f.up.railway.app/) e [API](https://bingoapi-production-e17b.up.railway.app/ready) respondem. O erro 500 do proxy de salas foi corrigido. Uma regressão 502 após a mudança de porta foi corrigida preservando as portas dos domínios existentes; o commit seguinte alterou pacotes observados pelos filtros e os deploys Railway web/admin concluíram com sucesso. HTTP público voltou a 200 para lobby, proxy de salas e configuração de segurança. O Supabase contém quatro migrações e 35/35 tabelas com RLS no schema privado; advisors de segurança sem avisos na última consulta. Nenhum usuário de teste foi criado no banco público.
 
-Nenhuma nova aprovação é necessária para continuar implementando: o usuário autorizou execução autônoma. Definição de destino, acesso e orçamento de hospedagem permanece pendência de implantação; nenhum custo foi contratado.
+**A operação pública não está concluída:** CAPTCHA obrigatório sem chave pública/configuração pronta impede cadastro; zero workers recentes no banco impedem confirmar o motor de sorteio ativo. SMTP real, Redis do destino, credencial SQL restrita, admin público e fluxo completo público ainda exigem validação. A integração Railway não estava disponível para configurar os serviços nesta sessão. [Passos concretos](railway.md).
 
-## Persistência gerenciada
+## Gates ainda abertos
 
-O projeto Supabase `bingo` recebeu as três migrações da aplicação em schema privado, 34 tabelas com RLS e bloqueio de acesso por `anon`/`authenticated`. Advisors de segurança: sem avisos após a configuração. Testes administrativos de balanceamento/imutabilidade foram revertidos integralmente. A conexão da API/worker com credencial restrita e o deploy público ainda não foram realizados. [Detalhes](supabase.md).
+Não há certificação ou liberação de dinheiro real. Não foram medidos 5.000/10.000 participantes, capacidade real da hospedagem, 50 fps em celular intermediário, operação distribuída nem restauração do banco público. Coletor de métricas, canal de alertas, autenticação de serviço para scrape, rotação com chaveiro de seeds/MFA, CSP estrita com nonce, instrumentação distribuída completa e revisão independente continuam pendentes. Retenção de dados e entrega integral do briefing exigem revisão própria; os relatórios por fase preservam os gates históricos.
+
+[Relatório da continuação](reports/completion-2026-10-16.md) · [Carga](load-test-results.md) · [Runbooks](runbooks/operacao.md) · [Supabase](supabase.md).

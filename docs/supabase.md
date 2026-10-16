@@ -1,6 +1,6 @@
 # Supabase do bingo
 
-Projeto dedicado existente: `bingo` (`pjsngxhbxdykcydzcjhi`), região `us-east-1`, PostgreSQL 17. Schema privado `bingo`, com 34 tabelas, as três migrações da aplicação e RLS em todas as tabelas. Não foram alterados os schemas `auth`, `storage` ou `public`, nem as permissões dos serviços do Supabase.
+Projeto dedicado existente: `bingo` (`pjsngxhbxdykcydzcjhi`), região `us-east-1`, PostgreSQL 17. Schema privado `bingo`, com 35 tabelas, as quatro migrações da aplicação e RLS em todas as tabelas. Não foram alterados os schemas `auth`, `storage` ou `public`, nem as permissões dos serviços do Supabase.
 
 O banco preserva a autenticação da API Fastify. Não utiliza Supabase Auth nem acesso de carteira pelo navegador. As roles `anon` e `authenticated` não possuem USAGE no schema `bingo`. O papel `bingo_runtime` não possui LOGIN, BYPASSRLS nem privilégios de migração; há políticas de acesso somente para o backend, que continua responsável por validar cada sessão, papel e titularidade.
 
@@ -12,13 +12,13 @@ Configure no ambiente privado do servidor:
 - `DATABASE_SCHEMA=bingo`.
 - A chave persistente `SEED_ENCRYPTION_KEY`, Redis e SMTP continuam necessários; preserve a chave para recuperar rodadas.
 
-A API e o worker ainda não foram implantados publicamente nem conectados ao projeto com uma credencial de execução. O conector não fornece a senha PostgreSQL. A role criada é NOLOGIN, portanto não constitui uma credencial pronta para uso. Não usar o proprietário `postgres` como usuário permanente da aplicação. A credencial restrita deve ser provisionada no destino durante a implantação.
+A API pública responde `/ready` e consulta salas. Nenhum worker saudável foi encontrado. A credencial restrita de execução ainda não foi comprovada por uma sessão de aplicação com essa role. O conector não fornece a senha PostgreSQL. A role criada é NOLOGIN, portanto não constitui uma credencial pronta para uso. Não usar o proprietário `postgres` como usuário permanente da aplicação. A credencial restrita deve ser provisionada no destino durante a implantação.
 
 `deploy/supabase-bootstrap.sql` registra a instalação reproduzível em schema novo. Execute o arquivo integralmente dentro de uma transação, após conferir o destino; a instalação rejeita schema existente. Os arquivos originais continuam em `apps/api/migrations`, e `schema_migrations` já contém os nomes corretos para que o runner da aplicação não tente reaplicar a base. Migrações futuras devem preservar RLS/políticas/permissões no schema privado.
 
 ## Verificações realizadas no serviço
 
-- 34/34 tabelas com RLS; três migrações da aplicação registradas.
+- 35/35 tabelas com RLS; quatro migrações da aplicação registradas.
 - Zero usuários cadastrados; nenhuma conta/senha de demonstração criada no serviço.
 - Acesso de schema para `anon` e `authenticated`: ambos falsos.
 - Transação contábil balanceada aceita e mutação do razão rejeitada por `APPEND_ONLY`; teste feito pela conexão administrativa e integralmente revertido. Nenhum lançamento de teste permaneceu.
@@ -29,6 +29,6 @@ A API e o worker ainda não foram implantados publicamente nem conectados ao pro
 
 A proposta inicial de instalar em `public` e revogar permissões gerais foi bloqueada. Foi substituída por instalação em schema privado sem mudanças às permissões existentes. A concessão do papel runtime a `postgres`, proposta apenas para testar a role, também foi bloqueada e abandonada; nenhuma associação foi alterada. O banco foi verificado com testes transacionais administrativos e consultas de permissões, sem contornar esses bloqueios.
 
-O Supabase atende à persistência. O motor persistente, WebSocket e worker continuam exigindo hospedagem própria; não foram movidos para Edge Functions.
+O Supabase atende à persistência. O motor persistente, WebSocket e worker usam serviços persistentes; não foram movidos para Edge Functions. A quarta migração acrescenta heartbeat do worker e tentativas de e-mail. As novas tabelas também receberam RLS e políticas privadas de backend. [Configuração da hospedagem](railway.md).
 
-A validação do código com suporte a schema privado passou em [CI](https://github.com/betwenes-ops/bingo/actions/runs/38920267692): 24 testes locais, 20 de integração, 6 de navegador, build, lint, tipos, auditoria, Compose e restauração. O teste novo verifica migrações e consultas em schema isolado contra PostgreSQL real.
+A validação de código, PostgreSQL real, navegador, Compose e restauração está registrada em [STATUS.md](STATUS.md). A conta runtime continua sendo uma verificação operacional pendente, separada dos testes de código.
