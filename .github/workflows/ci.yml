@@ -95,7 +95,7 @@ jobs:
           docker compose exec -T postgres dropdb -U bingo restore_check
       - name: Capture diagnostics
         if: always()
-        run: docker compose logs --no-color > compose.log
+        run: docker compose logs --no-color | tee compose.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { ShieldCheck, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { AccountServices } from './account-services';
 import { api, credits, type User } from '../lib/api';
 export function Account({
   user,
@@ -234,6 +235,7 @@ export function Account({
           </section>
         </div>
       )}
+      {tab === 'profile' && <AccountServices user={user} />}
     </>
   );
 }
