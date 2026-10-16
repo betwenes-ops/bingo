@@ -76,7 +76,7 @@ Integração usa Testcontainers com PostgreSQL 16 real e requer Docker, ou `TEST
 
 [Briefing](PROJECT_BRIEF.md) · [Arquitetura proposta](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Riscos](docs/RISKS.md) · [Decisões](docs/adr/README.md) · [Relatório de implementação](docs/reports/implementation-2026-10-16.md)
 
-[**CI verificado: 49 testes passaram**](https://github.com/betwenes-ops/bingo/actions/runs/38916686004): 24 locais, 19 de integração em PostgreSQL real e 6 de navegador, incluindo o fluxo completo em desktop/celular. Build, lint, typecheck, auditoria, Compose completo e restauração estrutural de backup também passaram.
+[**CI verificado: 50 testes passaram**](https://github.com/betwenes-ops/bingo/actions/runs/38920267692): 24 locais, 20 de integração em PostgreSQL real e 6 de navegador, incluindo o fluxo completo em desktop/celular. Build, lint, typecheck, auditoria, Compose completo e restauração estrutural de backup também passaram.
 
 O relatório distingue testes executados, testes apenas configurados e gates ainda abertos. Não há deploy público nesta entrega.
 

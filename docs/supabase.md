@@ -30,3 +30,5 @@ A API e o worker ainda não foram implantados publicamente nem conectados ao pro
 A proposta inicial de instalar em `public` e revogar permissões gerais foi bloqueada. Foi substituída por instalação em schema privado sem mudanças às permissões existentes. A concessão do papel runtime a `postgres`, proposta apenas para testar a role, também foi bloqueada e abandonada; nenhuma associação foi alterada. O banco foi verificado com testes transacionais administrativos e consultas de permissões, sem contornar esses bloqueios.
 
 O Supabase atende à persistência. O motor persistente, WebSocket e worker continuam exigindo hospedagem própria; não foram movidos para Edge Functions.
+
+A validação do código com suporte a schema privado passou em [CI](https://github.com/betwenes-ops/bingo/actions/runs/38920267692): 24 testes locais, 20 de integração, 6 de navegador, build, lint, tipos, auditoria, Compose e restauração. O teste novo verifica migrações e consultas em schema isolado contra PostgreSQL real.

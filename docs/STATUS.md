@@ -1,12 +1,12 @@
 # Estado verificável da entrega
 
-Atualizado em 2026-10-16. [CI verde do código](https://github.com/betwenes-ops/bingo/actions/runs/38916686004), commit 325af8bd23916f338e9f440cfc147a622de340d7.
+Atualizado em 2026-10-16. [CI verde do código](https://github.com/betwenes-ops/bingo/actions/runs/38920267692), commit 27baa53bddb855e2c597d25a6ea9f316959d0c54.
 
 | Verificação executada                                  | Resultado                                              |
 | ------------------------------------------------------ | ------------------------------------------------------ |
 | Instalação por lockfile, formatação, lint e TypeScript | Passou                                                 |
 | Domínio, matemática, HTTP e verificador independente   | 24 testes passaram                                     |
-| PostgreSQL real/Testcontainers                         | 19 testes passaram                                     |
+| PostgreSQL real/Testcontainers                         | 20 testes passaram                                     |
 | Navegador: desktop e celular, incluindo jogo completo  | 6 testes passaram                                      |
 | Build das aplicações/pacotes                           | Passou                                                 |
 | Auditoria de dependências                              | Sem vulnerabilidades conhecidas na execução registrada |
