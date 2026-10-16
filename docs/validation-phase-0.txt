@@ -1,0 +1,7 @@
+Command: python document-integrity checks (brief bytes, sections, nonempty files, relative links)
+PASS: briefing preserved byte-for-byte
+PASS: 16 Markdown files nonempty
+PASS: 14 relative documentation links resolve
+PASS: AGENTS repeats sections 2, 4, 28
+Application tests: NOT RUN (documentation-only review)
+Phase 0 infrastructure gate: PENDING

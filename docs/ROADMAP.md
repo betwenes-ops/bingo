@@ -1,0 +1,26 @@
+# Roadmap verificável
+
+Status: somente planejamento; nenhuma fase de implementação aprovada ou concluída. Dependências seguem a ordem abaixo. Cada fase exige docs/reports/fase-N.md com arquivos, comandos, saída real, cobertura, medições, screenshots quando houver UI, ADRs, pendências e decisões humanas.
+
+| Fase | Entrega | Gate e evidência obrigatória |
+|---|---|---|
+| 0A — revisão atual | Briefing integral, instruções, arquitetura, roadmap, riscos, ADRs, dúvidas | Links e integridade documental; aprovação do planejamento |
+| 0B — fundação | pnpm/Turbo, TS strict e noUncheckedIndexedAccess, apps e packages, Docker Compose, CI, lint/format/typecheck, README, .env.example | Instalação por lockfile; docker compose up com Postgres/Redis/Mailpit/API/web/admin saudáveis; lint, typecheck, build e smoke; CI realmente verde |
+| 1 | Cadastro/verificação/recuperação, sessões, Argon2id, TOTP, Turnstile; perfil, RBAC, carteira, razão, auditoria, admin inicial | Postgres/Redis reais via Testcontainers; concorrência, idempotência com payload divergente, rollback, estorno, soma zero, reconciliação, IDOR, MFA e CSRF; cobertura ≥90% carteira; testes de limites/pausa/exclusão desde a compra inicial |
+| 2 | Cartelas 75, padrões, RNG e commit-reveal, Prize Engine, verificador | Milhares de cartelas válidas; todos os padrões e limites; propriedades fast-check, vetores determinísticos, sem repetição, uniformidade/posições/independência; rateio com resto e soma exata; domínio/prêmios ≥90% |
+| 3 | Salas, compras, scheduler, WS, replay, outbox, premiação, admin de salas e UI funcional | E2E cadastro→crédito→compra→sorteio→prêmio→prova; kill real durante sorteio e liquidação; dois workers, fechamento concorrente, Redis indisponível, eventos duplicados e lacunas; nenhum débito/prêmio/bola duplicado |
+| 4 | Instant Bingo 75 e bingo-math, versões imutáveis | 30 bolas, maior padrão apenas; probabilidades exatas das classes de pagamento mutuamente exclusivas; milhões de simulações, IC e variância; RTP teórico no IC; tabela calibrada e relatório versionado antes de publicar |
+| 5 | Tokens, lobby, 3D, animação/áudio, perfis, acessibilidade, PWA | Screenshots 390×844 e 1440×900, autocrítica e correção; ≥50fps no dispositivo-alvo, fallback; LCP<2,5s, CLS<0,1, JS dentro do ADR; Lighthouse mobile ≥80/90/90; medições reais |
+| 6 | Bingo 90/80, padrões e salas recorrentes | Geração/avaliação por modalidade, 90 com cinco números/linha e coluna não vazia, prêmios sequenciais e empate na mesma bola; 80 por faixas; cancelamento e recorrência sem duplicação |
+| 7 | Admin avançado, dupla aprovação, relatórios/exportação, conciliação, atendimento e jogo responsável | E2E RBAC, solicitante≠aprovador, limites concorrentes, exclusão, pausas, histórico, contestação, exportação e anonimização preservando razão; observabilidade e auditoria |
+| 8 | Segurança, carga, revisão matemática/visual, staging e production-demo, backup/runbooks | 100→500→1.000→5.000→10.000 medidos progressivamente; p50/p95/p99, CPU/RAM, perdas/duplicações, reconexão e conciliação; restauração testada; todos os itens da seção 26; URL, health e smoke reais |
+
+## Dependências de segurança antecipadas
+
+Dupla aprovação para ajustes é obrigatória já na Fase 1 se ajustes existirem; a Fase 7 amplia a interface. Limites, pausa e autoexclusão são verificados desde a primeira compra, com interface completa até Fase 7. Regras/versionamento e compliance-gate precedem a primeira sala publicada. Observabilidade mínima começa na fundação, não apenas na Fase 8.
+
+## Documentação por gate
+
+Fase 1: data-model.md com ER/índices, threat-model.md inicial, retenção e compliance-gate.md. Fase 2: especificação RNG, vetores e certification-plan.md (pesquisa de fontes antes de citar normas/laboratórios). Fase 4: relatório matemático gerado. Fase 5: asset-needs.md/licenças, screenshots, medições. Fase 8: load-test-results.md e runbooks para queda durante sorteio, conciliação, backup, rotação e cancelamento.
+
+Fases não avançam por percentual de conclusão: um gate reprovado mantém a fase aberta. Testes estatísticos devem registrar seed de teste, tamanho amostral, alfa e política de múltiplas comparações; não repetimos uma amostra até obter verde. Metas de carga não são promessa de capacidade.
