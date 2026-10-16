@@ -165,7 +165,7 @@ export async function replySupport(
 export async function report(pool: pg.Pool) {
   return (
     await pool.query(
-      `SELECT date_trunc('day',t.created_at AT TIME ZONE 'America/Sao_Paulo')::date::text AS day,kind,count(DISTINCT t.id)::int AS transactions,COALESCE(sum(amount),0)::text AS volume FROM ledger_transactions t JOIN ledger_entries e ON e.transaction_id=t.id JOIN ledger_accounts a ON a.id=e.account_id WHERE a.kind='user' GROUP BY 1,2 ORDER BY 1 DESC,2 LIMIT 1000`,
+      `SELECT date_trunc('day',t.created_at AT TIME ZONE 'America/Sao_Paulo')::date::text AS day,t.kind,count(DISTINCT t.id)::int AS transactions,COALESCE(sum(amount),0)::text AS volume FROM ledger_transactions t JOIN ledger_entries e ON e.transaction_id=t.id JOIN ledger_accounts a ON a.id=e.account_id WHERE a.kind='user' GROUP BY 1,2 ORDER BY 1 DESC,2 LIMIT 1000`,
     )
   ).rows;
 }

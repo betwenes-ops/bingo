@@ -32,6 +32,10 @@ export type Snapshot = {
   serverTime: string;
 };
 export const messages: Record<string, string> = {
+  TWO_PERSON_REQUIRED: 'Outra pessoa precisa conferir esta solicitação.',
+  TREASURY_INSUFFICIENT: 'O fundo não tem créditos suficientes para reservar este prêmio.',
+  SALES_PAUSED: 'As vendas estão pausadas nesta sala.',
+  GAME_UNAVAILABLE: 'Esta modalidade está temporariamente indisponível.',
   RATE_LIMITED: 'Muitas solicitações. Aguarde um momento e tente novamente.',
   UNAUTHENTICATED: 'Entre na sua conta para continuar.',
   INVALID_CREDENTIALS: 'E-mail ou senha incorretos.',
@@ -70,14 +74,22 @@ export async function api<T>(path: string, options: RequestInit = {}, csrf?: str
   return data as T;
 }
 export function credits(value: string | undefined): string {
-  const n = BigInt(value ?? '0');
-  return `${(n / 100n).toLocaleString('pt-BR')},${(n % 100n).toString().padStart(2, '0')}`;
+  const signed = BigInt(value ?? '0');
+  const n = signed < 0n ? -signed : signed;
+  return `${signed < 0n ? '-' : ''}${(n / 100n).toLocaleString('pt-BR')},${(n % 100n).toString().padStart(2, '0')}`;
 }
 export function stateLabel(state: string) {
   return (
     (
       {
         OPEN_FOR_SALES: 'Inscrições abertas',
+        CREATED: 'Criada',
+        SCHEDULED: 'Agendada',
+        SALES_CLOSED: 'Vendas encerradas',
+        READY: 'Preparada',
+        VERIFYING: 'Verificando',
+        SETTLING: 'Creditando prêmios',
+        FAILED: 'Falha operacional',
         DRAWING: 'Ao vivo',
         COMPLETED: 'Concluída',
         CANCELLED: 'Cancelada',

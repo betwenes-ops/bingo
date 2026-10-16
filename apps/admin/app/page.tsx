@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { api, credits, stateLabel, type User, type Room } from '../../web/lib/api';
 import { Auth } from '../../web/components/auth';
+import { Finance } from './finance';
 import { Account } from '../../web/components/account';
 type Summary = {
   users: number;
@@ -209,6 +210,9 @@ export default function Admin() {
                 { id: 'rooms', label: 'Salas e rodadas', Icon: Radio },
                 { id: 'users', label: 'Usuários', Icon: Users },
                 { id: 'audit', label: 'Auditoria', Icon: ScrollText },
+                ...(['superadmin', 'finance', 'auditor'].includes(user.role)
+                  ? [{ id: 'finance', label: 'Financeiro', Icon: ShieldCheck }]
+                  : []),
               ].map(({ id, label, Icon }) => (
                 <button className={tab === id ? 'active' : ''} key={id} onClick={() => setTab(id)}>
                   <Icon size={17} />
@@ -240,6 +244,7 @@ export default function Admin() {
                         rooms: 'Cada rodada, em detalhe.',
                         users: 'Pessoas no centro.',
                         audit: 'Uma trilha que permanece.',
+                        finance: 'Cada ajuste, conferido.',
                       } as Record<string, string>
                     )[tab]
                   }
@@ -431,6 +436,7 @@ export default function Admin() {
                 </div>
               </section>
             )}
+            {tab === 'finance' && <Finance user={user} />}
             {tab === 'audit' && (
               <section className="table-panel">
                 <div className="table-scroll">

@@ -17,7 +17,15 @@ process.on('SIGTERM', () => {
 });
 while (running) {
   try {
-    await runSchedules(pool, config.SEED_ENCRYPTION_KEY);
+    await runSchedules(pool, config.SEED_ENCRYPTION_KEY).catch((error: unknown) => {
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          message: 'Schedule dispatch failed',
+          error: error instanceof Error ? error.message : 'unknown',
+        }),
+      );
+    });
     const rounds = await pool.query<{ id: string }>(
       "SELECT id FROM game_rounds WHERE (state='SCHEDULED' AND opens_at<=now()) OR (state='OPEN_FOR_SALES' AND sales_close_at<=now()) OR (state='DRAWING' AND next_ball_at<=now()) ORDER BY COALESCE(next_ball_at,sales_close_at) LIMIT 100",
     );
@@ -37,7 +45,7 @@ while (running) {
     }
     await transaction(pool, async (tx) => {
       const pending = await tx.query(
-        'SELECT o.id,e.* FROM outbox_events o JOIN game_events e ON e.id=o.event_id WHERE o.published_at IS NULL ORDER BY e.round_id,e.seq FOR UPDATE OF o SKIP LOCKED LIMIT 100',
+        'SELECT e.*,o.id AS outbox_id FROM outbox_events o JOIN game_events e ON e.id=o.event_id WHERE o.published_at IS NULL ORDER BY e.round_id,e.seq FOR UPDATE OF o SKIP LOCKED LIMIT 100',
       );
       for (const e of pending.rows) {
         await redis.publish('bingo:events', JSON.stringify(e));
