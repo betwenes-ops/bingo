@@ -68,12 +68,10 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       return reply.status(400).send({ code: 'INVALID_REQUEST', correlationId: request.id });
     const status = (error as { statusCode?: number }).statusCode;
     if (status && status >= 400 && status < 500)
-      return reply
-        .status(status)
-        .send({
-          code: status === 429 ? 'RATE_LIMITED' : 'REQUEST_REJECTED',
-          correlationId: request.id,
-        });
+      return reply.status(status).send({
+        code: status === 429 ? 'RATE_LIMITED' : 'REQUEST_REJECTED',
+        correlationId: request.id,
+      });
     request.log.error({ err: error }, 'Request failed');
     return reply.status(500).send({ code: 'INTERNAL_ERROR', correlationId: request.id });
   });
