@@ -1,7 +1,15 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-export default function Globe({ active }: { active: boolean }) {
+export default function Globe({
+  active,
+  quality = 'auto',
+  onFallback,
+}: {
+  active: boolean;
+  quality?: 'auto' | 'high' | 'low';
+  onFallback?: () => void;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const [fallback, setFallback] = useState(false);
   useEffect(() => {
@@ -16,10 +24,15 @@ export default function Globe({ active }: { active: boolean }) {
       });
     } catch {
       setFallback(true);
+      onFallback?.();
       return;
     }
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    const weak = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+    const low =
+      quality === 'low' ||
+      (quality === 'auto' && ((weak ?? 8) <= 4 || navigator.hardwareConcurrency <= 4));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, low ? 1 : quality === 'high' ? 2 : 1.5));
     renderer.setSize(root.clientWidth, 300);
     root.appendChild(renderer.domElement);
     const scene = new THREE.Scene(),
@@ -32,7 +45,7 @@ export default function Globe({ active }: { active: boolean }) {
     const group = new THREE.Group();
     scene.add(group);
     const cage = new THREE.Mesh(
-      new THREE.SphereGeometry(1.65, 24, 16),
+      new THREE.SphereGeometry(1.65, low ? 16 : 24, low ? 12 : 16),
       new THREE.MeshPhysicalMaterial({
         color: 0xb8d3dd,
         transparent: true,
@@ -72,18 +85,41 @@ export default function Globe({ active }: { active: boolean }) {
     scene.add(base);
     let frame = 0,
       stopped = false;
-    let last = 0;
+    let sampleStart = 0,
+      samples = 0,
+      reductions = 0;
     const render = (time: number) => {
       if (stopped) return;
-      if (time - last > 1000 / 40) {
-        last = time;
-        if (active && !reduced) {
-          group.rotation.y = time * 0.00017;
-          balls.forEach((b, i) => {
-            b.position.y = Math.sin(time * 0.0018 + i) * 0.75;
-          });
+      if (document.hidden) {
+        sampleStart = 0;
+        samples = 0;
+        frame = requestAnimationFrame(render);
+        return;
+      }
+      if (active && !reduced) {
+        group.rotation.y = time * 0.00017;
+        balls.forEach((ball, i) => {
+          ball.position.y = Math.sin(time * 0.0018 + i) * 0.75;
+        });
+      }
+      renderer.render(scene, camera);
+      if (quality === 'auto') {
+        sampleStart ||= time;
+        samples++;
+        if (time - sampleStart > 2000) {
+          const fps = (samples * 1000) / (time - sampleStart);
+          sampleStart = time;
+          samples = 0;
+          if (fps < 45 && reductions === 0) {
+            renderer.setPixelRatio(0.75);
+            renderer.setSize(root.clientWidth, 300);
+            reductions++;
+          } else if (fps < 30 && reductions > 0) {
+            setFallback(true);
+            onFallback?.();
+            return;
+          }
         }
-        renderer.render(scene, camera);
       }
       frame = requestAnimationFrame(render);
     };
@@ -97,6 +133,7 @@ export default function Globe({ active }: { active: boolean }) {
     const lost = (e: Event) => {
       e.preventDefault();
       setFallback(true);
+      onFallback?.();
     };
     renderer.domElement.addEventListener('webglcontextlost', lost);
     return () => {
@@ -114,7 +151,7 @@ export default function Globe({ active }: { active: boolean }) {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [active]);
+  }, [active, quality, onFallback]);
   return (
     <div ref={host} className="globe-host" aria-hidden="true">
       {fallback && (

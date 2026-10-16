@@ -34,13 +34,41 @@ export function Room({
     [quantity, setQuantity] = useState(1),
     [busy, setBusy] = useState(false),
     [connected, setConnected] = useState(false),
-    [three, setThree] = useState(false),
+    [quality, setQuality] = useState<'2d' | 'auto' | 'high' | 'low'>('2d'),
     [verification, setVerification] = useState('');
+  const three = quality !== '2d';
+  const fallback = useCallback(() => setQuality('2d'), []);
+  useEffect(() => {
+    try {
+      const value = localStorage.getItem('bingo-quality-v1');
+      if (value && ['2d', 'auto', 'high', 'low'].includes(value))
+        setQuality(value as typeof quality);
+    } catch {
+      /* Preferences remain in memory when storage is unavailable. */
+    }
+  }, []);
+  function changeQuality(value: typeof quality) {
+    setQuality(value);
+    try {
+      localStorage.setItem('bingo-quality-v1', value);
+    } catch {
+      /* Preferences remain in memory when storage is unavailable. */
+    }
+  }
   const key = useRef<string | null>(null);
   const cursor = useRef(0);
+  const clockOffset = useRef(0);
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
   const load = useCallback(async () => {
     try {
+      const started = Date.now();
       const snapshot = await api<Snapshot>(`/v1/rounds/${room.id}`);
+      clockOffset.current = Date.parse(snapshot.serverTime) - (started + Date.now()) / 2;
       cursor.current = Math.max(cursor.current, snapshot.round.event_seq);
       setData((previous) =>
         previous && previous.round.event_seq > snapshot.round.event_seq ? previous : snapshot,
@@ -225,11 +253,39 @@ export function Room({
             BINGO {r.variant} · {stateLabel(r.state)}
           </span>
           <h1>{r.name}</h1>
+          {['SCHEDULED', 'OPEN_FOR_SALES'].includes(r.state) && now > 0 && (
+            <p role="timer">
+              {r.state === 'SCHEDULED' ? 'Vendas abrem' : 'Vendas encerram'} em{' '}
+              {Math.max(
+                0,
+                Math.ceil(
+                  (Date.parse(
+                    r.state === 'SCHEDULED' ? (r.opens_at ?? r.sales_close_at) : r.sales_close_at,
+                  ) -
+                    now -
+                    clockOffset.current) /
+                    1000,
+                ),
+              )}{' '}
+              segundos
+            </p>
+          )}
         </div>
-        <button className="secondary" onClick={() => setThree(!three)}>
+        <div className="game-settings">
           <Box size={16} />
-          {three ? 'Visual 2D' : 'Ativar globo 3D'}
-        </button>
+          <label>
+            Qualidade visual
+            <select
+              value={quality}
+              onChange={(e) => changeQuality(e.target.value as typeof quality)}
+            >
+              <option value="2d">2D · econômico</option>
+              <option value="auto">3D · automático</option>
+              <option value="high">3D · alta</option>
+              <option value="low">3D · baixa</option>
+            </select>
+          </label>
+        </div>
       </div>
       {error && (
         <p className="error" role="alert">
@@ -239,7 +295,12 @@ export function Room({
       <div className="game-layout">
         <section className="draw-panel">
           {three ? (
-            <Globe active={r.state === 'DRAWING'} />
+            <>
+              <Globe active={r.state === 'DRAWING'} quality={quality} onFallback={fallback} />
+              <div className="globe-number" aria-live="polite">
+                {latest ? `Bola ${latest}` : 'Aguardando sorteio'}
+              </div>
+            </>
           ) : (
             <div className="draw-stage">
               <div className="stage-ring" />
@@ -349,12 +410,11 @@ export function Room({
             {data?.cards.map((c, index) => (
               <article className="bingo-card" key={c.id}>
                 <p className="card-proximity">
-                  {Math.min(
-                    ...r.rules.patterns.map((p) =>
-                      remaining(c.card as Card, p.pattern as Pattern, balls),
-                    ),
-                  )}{' '}
-                  bolas para o padrão mais próximo
+                  {r.state === 'COMPLETED'
+                    ? 'Rodada encerrada'
+                    : r.rules.patterns.some((p) => !data.completedPatterns?.includes(p.pattern))
+                      ? `${Math.min(...r.rules.patterns.filter((p) => !data.completedPatterns?.includes(p.pattern)).map((p) => remaining(c.card as Card, p.pattern as Pattern, balls)))} bolas para o próximo padrão disponível`
+                      : 'Padrões concluídos'}
                 </p>
                 <div className="card-label">
                   CARTELA {String(index + 1).padStart(2, '0')}
@@ -397,6 +457,10 @@ export function Room({
         </h3>
         <p>Compromisso publicado antes das vendas</p>
         <code>{r.commitment}</code>
+        <p>
+          Mínimo de {r.min_players} participante(s). Se o mínimo não for atingido, a rodada é
+          cancelada e as compras são estornadas.
+        </p>
         <p>
           Padrões:{' '}
           {r.rules.patterns

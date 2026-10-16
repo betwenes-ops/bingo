@@ -498,7 +498,7 @@ export async function snapshot(pool: pg.Pool, roundId: string, userId: string) {
   return transaction(pool, async (tx) => {
     await tx.query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
     const r = await tx.query(
-      'SELECT id,name,variant,state,price::text,max_cards,prize_bps,sales_close_at,opens_at,sales_paused,version_id,commitment,current_position,event_seq,rules FROM game_rounds WHERE id=$1',
+      'SELECT id,name,variant,state,price::text,max_cards,prize_bps,min_players,sales_close_at,opens_at,sales_paused,version_id,commitment,current_position,event_seq,rules FROM game_rounds WHERE id=$1',
       [roundId],
     );
     if (!r.rowCount) throw new AppError('ROUND_NOT_FOUND', 404);
@@ -519,6 +519,12 @@ export async function snapshot(pool: pg.Pool, roundId: string, userId: string) {
       balls: balls.rows,
       cards: cards.rows,
       awards: awards.rows,
+      completedPatterns: (
+        await tx.query<{ pattern: string }>(
+          'SELECT DISTINCT pattern FROM prize_awards WHERE round_id=$1',
+          [roundId],
+        )
+      ).rows.map((r) => r.pattern),
       serverTime: new Date().toISOString(),
     };
   });

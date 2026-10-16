@@ -146,3 +146,32 @@
     display: none;
   }
 }
+
+.hash-value {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  color: var(--muted);
+  margin: 8px 0;
+}
+.table-panel article {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+}
+.table-panel textarea {
+  width: 100%;
+  min-height: 100px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  padding: 12px;
+  border-radius: 6px;
+}
+.table-panel form {
+  gap: 14px;
+}
+.table-panel form label {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}

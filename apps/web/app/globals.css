@@ -2207,3 +2207,68 @@ dialog.overlay::backdrop {
 .skip {
   margin: 0 auto 20px;
 }
+
+.offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #634d11;
+  color: #fff;
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+}
+.offline-page {
+  max-width: 640px;
+  margin: 15vh auto;
+  padding: 24px;
+}
+.table-panel textarea {
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.table-panel form label {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.table-panel article {
+  border-top: 1px solid var(--line);
+  padding: 15px 0;
+}
+.table-panel summary {
+  cursor: pointer;
+  padding: 14px 0;
+  min-height: 44px;
+}
+.card-proximity {
+  font-size: 10px;
+  color: var(--muted);
+  padding: 10px 12px 0;
+}
+.game-settings {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.game-settings select {
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-height: 44px;
+}
+.globe-number {
+  text-align: center;
+  color: var(--gold);
+  font-size: 32px;
+  font-weight: 700;
+  margin: -15px 0 20px;
+}

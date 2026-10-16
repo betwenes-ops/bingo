@@ -34,6 +34,7 @@ export type Snapshot = {
   round: Room & { event_seq: number };
   balls: { number: number; position: number }[];
   cards: CardData[];
+  completedPatterns?: string[];
   awards: { card_id: string; pattern: string; amount: string }[];
   serverTime: string;
 };
@@ -91,6 +92,15 @@ export function stateLabel(state: string) {
     (
       {
         OPEN_FOR_SALES: 'Inscrições abertas',
+        PENDING: 'Pendente',
+        APPROVED: 'Aprovado',
+        REJECTED: 'Rejeitado',
+        OPEN: 'Aberto',
+        ANSWERED: 'Respondido',
+        CLOSED: 'Encerrado',
+        HELD: 'Reservado',
+        CONSUMED: 'Consumido',
+        RELEASED: 'Liberado',
         CREATED: 'Criada',
         SCHEDULED: 'Agendada',
         SALES_CLOSED: 'Vendas encerradas',

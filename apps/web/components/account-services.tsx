@@ -120,7 +120,7 @@ export function AccountServices({ user }: { user: User }) {
         {support.cases.map((c) => (
           <article key={c.id}>
             <h3>
-              {c.subject} · {c.status}
+              {c.subject} · {stateLabel(c.status)}
             </h3>
             <p>{c.message}</p>
             {support.messages

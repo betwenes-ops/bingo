@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { ShieldCheck, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { AccountSecurity } from './account-security';
 import { AccountServices } from './account-services';
 import { api, credits, type User } from '../lib/api';
 export function Account({
@@ -235,7 +236,12 @@ export function Account({
           </section>
         </div>
       )}
-      {tab === 'profile' && <AccountServices user={user} />}
+      {tab === 'profile' && (
+        <>
+          <AccountServices user={user} />
+          <AccountSecurity user={user} onUpdate={onUpdate} />
+        </>
+      )}
     </>
   );
 }

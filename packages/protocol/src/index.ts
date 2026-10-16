@@ -10,20 +10,35 @@ export const credentials = z.object({
     .optional(),
 });
 export const purchaseRequest = z.object({ quantity: z.number().int().min(1).max(24) });
-export const roomInput = z.object({
-  name: z.string().min(3).max(70),
-  variant: z.union([z.literal(75), z.literal(80), z.literal(90)]),
-  price: credits.refine((v) => BigInt(v) > 0n),
-  salesSeconds: z.number().int().min(15).max(86400),
-  ballIntervalMs: z.number().int().min(1000).max(10000),
-  maxCards: z.number().int().min(1).max(24),
-  prizeBps: z.number().int().min(1).max(10000),
-  minPlayers: z.number().int().min(1).max(100),
-  startsInSeconds: z.number().int().min(0).max(604800).optional(),
-  pattern: z.enum(['line', 'column', 'diagonal', 'corners', 'x', 'l', 'full']).optional(),
-  prizePolicy: z.enum(['proportional', 'fixed']).optional(),
-  fixedPrize: credits.optional(),
-});
+export const roomInput = z
+  .object({
+    name: z.string().min(3).max(70),
+    variant: z.union([z.literal(75), z.literal(80), z.literal(90)]),
+    price: credits.refine((v) => BigInt(v) > 0n),
+    salesSeconds: z.number().int().min(15).max(86400),
+    ballIntervalMs: z.number().int().min(1000).max(10000),
+    maxCards: z.number().int().min(1).max(24),
+    prizeBps: z.number().int().min(1).max(10000),
+    minPlayers: z.number().int().min(1).max(100),
+    startsInSeconds: z.number().int().min(0).max(604800).optional(),
+    pattern: z.enum(['line', 'column', 'diagonal', 'corners', 'x', 'l', 'full']).optional(),
+    prizePolicy: z.enum(['proportional', 'fixed']).optional(),
+    fixedPrize: credits.optional(),
+  })
+  .superRefine((input, ctx) => {
+    if (input.variant === 80 && input.pattern && ['x', 'l'].includes(input.pattern))
+      ctx.addIssue({
+        code: 'custom',
+        path: ['pattern'],
+        message: 'Padrão disponível somente no bingo 75.',
+      });
+    if (input.prizePolicy === 'fixed' && (!input.fixedPrize || BigInt(input.fixedPrize) <= 0n))
+      ctx.addIssue({
+        code: 'custom',
+        path: ['fixedPrize'],
+        message: 'Prêmio fixo deve ser positivo.',
+      });
+  });
 export const eventEnvelope = z.object({
   v: z.literal(1),
   eventId: z.uuid(),

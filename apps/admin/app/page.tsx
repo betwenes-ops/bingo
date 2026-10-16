@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { api, credits, stateLabel, type User, type Room } from '../../web/lib/api';
 import { Auth } from '../../web/components/auth';
+import { Operations } from './operations';
 import { Finance } from './finance';
 import { Account } from '../../web/components/account';
 type Summary = {
@@ -111,25 +112,35 @@ export default function Admin() {
     setError('');
     const f = new FormData(e.currentTarget);
     try {
+      const config = {
+        name: f.get('name'),
+        variant: Number(f.get('variant')),
+        price: (BigInt(String(f.get('price'))) * 100n).toString(),
+        salesSeconds: Number(f.get('seconds')),
+        ballIntervalMs: 4000,
+        maxCards: 24,
+        prizeBps: 8500,
+        minPlayers: Number(f.get('minimum')),
+        startsInSeconds: Number(f.get('starts')),
+        pattern: f.get('pattern'),
+        prizePolicy: f.get('policy'),
+        ...(f.get('policy') === 'fixed'
+          ? { fixedPrize: (BigInt(String(f.get('fixedPrize'))) * 100n).toString() }
+          : {}),
+      };
+      const recurring = f.get('recurring') === 'on';
       await api(
-        '/v1/admin/rooms',
+        recurring ? '/v1/admin/schedules' : '/v1/admin/rooms',
         {
           method: 'POST',
-          body: JSON.stringify({
-            name: f.get('name'),
-            variant: Number(f.get('variant')),
-            price: (BigInt(String(f.get('price'))) * 100n).toString(),
-            salesSeconds: Number(f.get('seconds')),
-            ballIntervalMs: 4000,
-            maxCards: 24,
-            prizeBps: 8500,
-            minPlayers: 1,
-          }),
+          body: JSON.stringify(
+            recurring ? { config, intervalSeconds: Number(f.get('interval')) } : config,
+          ),
         },
         user.csrfToken,
       );
       setCreating(false);
-      setSuccess('Sala aberta. As regras já estão congeladas.');
+      setSuccess('Configuração publicada. As regras da rodada são imutáveis.');
       await refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -210,6 +221,7 @@ export default function Admin() {
                 { id: 'rooms', label: 'Salas e rodadas', Icon: Radio },
                 { id: 'users', label: 'Usuários', Icon: Users },
                 { id: 'audit', label: 'Auditoria', Icon: ScrollText },
+                { id: 'operations', label: 'Operação e suporte', Icon: ShieldCheck },
                 ...(['superadmin', 'finance', 'auditor'].includes(user.role)
                   ? [{ id: 'finance', label: 'Financeiro', Icon: ShieldCheck }]
                   : []),
@@ -245,6 +257,7 @@ export default function Admin() {
                         users: 'Pessoas no centro.',
                         audit: 'Uma trilha que permanece.',
                         finance: 'Cada ajuste, conferido.',
+                        operations: 'Serviços e equipe.',
                       } as Record<string, string>
                     )[tab]
                   }
@@ -356,6 +369,66 @@ export default function Admin() {
                         required
                       />
                     </label>
+                    <label>
+                      Mínimo de participantes
+                      <input
+                        name="minimum"
+                        type="number"
+                        min="1"
+                        max="100"
+                        defaultValue="1"
+                        required
+                      />
+                    </label>
+                    <label>
+                      Abrir após (segundos)
+                      <input
+                        name="starts"
+                        type="number"
+                        min="0"
+                        max="604800"
+                        defaultValue="0"
+                        required
+                      />
+                    </label>
+                    <label>
+                      Padrão (75/80 bolas)
+                      <select name="pattern">
+                        <option value="full">Cartela cheia</option>
+                        <option value="line">Linha</option>
+                        <option value="column">Coluna</option>
+                        <option value="diagonal">Diagonal</option>
+                        <option value="corners">Quatro cantos</option>
+                        <option value="x">X (75 bolas)</option>
+                        <option value="l">L (75 bolas)</option>
+                      </select>
+                    </label>
+                    <label>
+                      Política de prêmio
+                      <select name="policy">
+                        <option value="proportional">85% das compras</option>
+                        <option value="fixed">Prêmio fixo com reserva</option>
+                      </select>
+                    </label>
+                    <label>
+                      Prêmio fixo (créditos inteiros)
+                      <input name="fixedPrize" type="number" min="1" defaultValue="1000" required />
+                    </label>
+                    <label className="checkbox">
+                      <input type="checkbox" name="recurring" />
+                      Criar recorrência
+                    </label>
+                    <label>
+                      Intervalo da recorrência (segundos)
+                      <input
+                        name="interval"
+                        type="number"
+                        min="60"
+                        max="604800"
+                        defaultValue="300"
+                        required
+                      />
+                    </label>
                     <p>
                       Fundo proporcional: 85% por compra. Até 24 cartelas por pessoa. Intervalo: 4
                       segundos. Mínimo: 1 participante. 75/80: cartela cheia. 90: linha 20%, duas
@@ -424,7 +497,10 @@ export default function Admin() {
                         .filter((u) => u.email.toLowerCase().includes(query.toLowerCase()))
                         .map((u) => (
                           <tr key={u.id}>
-                            <td>{u.email}</td>
+                            <td>
+                              {u.email}
+                              <small className="hash-value">{u.id}</small>
+                            </td>
                             <td>{u.role}</td>
                             <td>{u.email_verified ? 'Confirmado' : 'Pendente'}</td>
                             <td>{u.blocked ? 'Bloqueado' : 'Ativo'}</td>
@@ -437,6 +513,9 @@ export default function Admin() {
               </section>
             )}
             {tab === 'finance' && <Finance user={user} />}
+            {tab === 'operations' && (
+              <Operations user={user} rooms={rooms} users={users} onChange={refresh} />
+            )}
             {tab === 'audit' && (
               <section className="table-panel">
                 <div className="table-scroll">
