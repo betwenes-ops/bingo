@@ -40,6 +40,14 @@ const failure = (message: string, error: unknown) =>
         error instanceof AppError ? error.code : error instanceof Error ? error.name : 'unknown',
     }),
   );
+// Verify the configured private Redis route even before the first game event.
+// PostgreSQL remains authoritative and Redis downtime must not stop the engine.
+try {
+  await redis.ping();
+  console.info(JSON.stringify({ level: 'info', message: 'Redis startup probe succeeded' }));
+} catch (error) {
+  failure('Redis startup probe failed; durable event replay remains available', error);
+}
 while (running) {
   try {
     await runSchedules(pool, config.SEED_ENCRYPTION_KEY).catch((e) =>
