@@ -20,3 +20,7 @@ O Compose completo e uma restauração estrutural de backup passaram em CI. Dinh
 [Relatório desta continuação](reports/operations-2026-10-16.md) · [Guia de operação](operations.md).
 
 Nenhuma nova aprovação é necessária para continuar implementando: o usuário autorizou execução autônoma. Definição de destino, acesso e orçamento de hospedagem permanece pendência de implantação; nenhum custo foi contratado.
+
+## Persistência gerenciada
+
+O projeto Supabase `bingo` recebeu as três migrações da aplicação em schema privado, 34 tabelas com RLS e bloqueio de acesso por `anon`/`authenticated`. Advisors de segurança: sem avisos após a configuração. Testes administrativos de balanceamento/imutabilidade foram revertidos integralmente. A conexão da API/worker com credencial restrita e o deploy público ainda não foram realizados. [Detalhes](supabase.md).

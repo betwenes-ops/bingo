@@ -583,3 +583,29 @@ describe('Atendimento, privacidade e modalidades', () => {
       );
     });
 });
+
+describe('Schema privado para hospedagem gerenciada', () => {
+  it('isola as migrações e consultas sem alterar o schema public', async () => {
+    await pool.query('CREATE SCHEMA bingo_isolation_test');
+    const scoped = database(databaseUrl, 'bingo_isolation_test').pool;
+    try {
+      await migrate(scoped);
+      expect((await scoped.query('SELECT current_schema() AS schema')).rows[0].schema).toBe(
+        'bingo_isolation_test',
+      );
+      expect((await scoped.query('SELECT * FROM schema_migrations')).rowCount).toBe(3);
+      expect((await scoped.query('SELECT count(*)::int AS count FROM users')).rows[0].count).toBe(
+        0,
+      );
+      expect(
+        (await pool.query('SELECT count(*)::int AS count FROM public.users')).rows[0].count,
+      ).toBeGreaterThan(0);
+      expect(() => database(databaseUrl, 'bingo;SET ROLE postgres')).toThrow(
+        'Invalid DATABASE_SCHEMA',
+      );
+    } finally {
+      await scoped.end();
+      await pool.query('DROP SCHEMA bingo_isolation_test CASCADE');
+    }
+  });
+});

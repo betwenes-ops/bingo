@@ -38,6 +38,10 @@ docker compose exec api pnpm --filter @bingo/api exec node --import tsx src/prom
 
 Reiniciar API/worker não deve apagar compras ou sorteios: os dados e a cadência estão no PostgreSQL. Não use `docker compose down -v` se quiser preservar os dados.
 
+## Banco no Supabase
+
+O projeto dedicado `bingo` já possui o schema privado com 34 tabelas e RLS. Configure `DATABASE_SCHEMA=bingo` no servidor ao usar esse banco; o Compose local continua usando `public`. A API e o worker ainda precisam de implantação e credencial privada de execução. [Configuração, verificações e limites](docs/supabase.md).
+
 ## Comandos de verificação
 
 ```sh
