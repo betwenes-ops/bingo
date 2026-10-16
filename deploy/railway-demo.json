@@ -1,5 +1,9 @@
 {
   "projectId": "6ac1f620-3a63-421f-865c-06502fee7956",
   "webUrl": "https://bingoweb-production-8b1f.up.railway.app",
-  "apiUrl": "https://bingoapi-production-e17b.up.railway.app"
+  "apiUrl": "https://bingoapi-production-e17b.up.railway.app",
+  "frontendPorts": {
+    "web": 3000,
+    "admin": 3001
+  }
 }
