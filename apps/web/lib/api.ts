@@ -32,6 +32,7 @@ export type Snapshot = {
   serverTime: string;
 };
 export const messages: Record<string, string> = {
+  RATE_LIMITED: 'Muitas solicitações. Aguarde um momento e tente novamente.',
   UNAUTHENTICATED: 'Entre na sua conta para continuar.',
   INVALID_CREDENTIALS: 'E-mail ou senha incorretos.',
   EMAIL_NOT_VERIFIED: 'Confirme seu e-mail antes de entrar.',

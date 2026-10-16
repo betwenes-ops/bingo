@@ -78,3 +78,20 @@ it('rotas privadas exigem sessão e OpenAPI deriva dos schemas', async () => {
   const spec = (await app.inject({ url: '/openapi.json' })).json();
   expect(spec.paths['/v1/auth/register'].post.requestBody).toBeDefined();
 });
+
+it('limite de login/cadastro retorna 429 em vez de erro interno', async () => {
+  let status = 0,
+    code = '';
+  for (let i = 0; i < 12; i++) {
+    const r = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      headers: { origin: 'http://localhost:3000' },
+      payload: { email: 'invalid', password: 'short' },
+    });
+    status = r.statusCode;
+    code = r.json().code;
+  }
+  expect(status).toBe(429);
+  expect(code).toBe('RATE_LIMITED');
+});

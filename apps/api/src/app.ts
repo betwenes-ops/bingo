@@ -46,7 +46,7 @@ export async function buildApp(pool: pg.Pool, config: Config) {
   await app.register(cookie);
   await app.register(cors, { origin: config.ALLOWED_ORIGINS.split(','), credentials: true });
   await app.register(helmet);
-  await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
+  await app.register(rateLimit, { max: 600, timeWindow: '1 minute' });
   await app.register(websocket, { options: { maxPayload: 4096 } });
   await app.register(swagger, {
     openapi: { info: { title: 'Bingo Demo API', version: '0.1.0' } },
@@ -66,6 +66,14 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       return reply.status(error.status).send({ code: error.code, correlationId: request.id });
     if ((error as { validation?: unknown }).validation)
       return reply.status(400).send({ code: 'INVALID_REQUEST', correlationId: request.id });
+    const status = (error as { statusCode?: number }).statusCode;
+    if (status && status >= 400 && status < 500)
+      return reply
+        .status(status)
+        .send({
+          code: status === 429 ? 'RATE_LIMITED' : 'REQUEST_REJECTED',
+          correlationId: request.id,
+        });
     request.log.error({ err: error }, 'Request failed');
     return reply.status(500).send({ code: 'INTERNAL_ERROR', correlationId: request.id });
   });
