@@ -3,7 +3,7 @@ import { randomUUID, randomBytes } from 'node:crypto';
 import { database, transaction } from '../../apps/api/src/db';
 import { register, verifyEmail, totpCode } from '../../apps/api/src/identity';
 import { audit } from '../../apps/api/src/wallet';
-import { encryptSeed, decryptSeed } from '@bingo/domain/rng';
+import { encryptSeed, decryptSeed } from '../../packages/domain/src/rng';
 
 test('admin com MFA publica recorrência e exige uma segunda pessoa no financeiro', async ({
   page,
