@@ -73,7 +73,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - run: cp .env.example .env
+      - name: Configure isolated demo secret
+        run: |
+          cp .env.example .env
+          sed -i "s/GENERATE_WITH_NODE_CRYPTO_32_BYTES_HEX/$(openssl rand -hex 32)/" .env
       - name: Build and start complete demo
         run: docker compose up --build -d
       - name: Verify API, player app and admin

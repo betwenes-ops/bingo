@@ -495,3 +495,91 @@ describe('Operação financeira e versões publicadas', () => {
     ).rejects.toThrow('ROUND_TERMINAL');
   });
 });
+
+describe('Atendimento, privacidade e modalidades', () => {
+  it('isola atendimento e exportação, rotaciona sessão e desativa conta', async () => {
+    const id = await player('privacy@example.test');
+    await player('privacy-other@example.test');
+    const session = await login(pool, 'privacy@example.test', 'test-password-1234', key);
+    const other = await login(pool, 'privacy-other@example.test', 'test-password-1234', key);
+    const headers = { origin, 'x-csrf-token': session.csrf };
+    const opened = await app.inject({
+      method: 'POST',
+      url: '/v1/me/support',
+      cookies: { session: session.token },
+      headers,
+      payload: { subject: 'Ajuda com minha conta', message: 'Solicitação de atendimento privada.' },
+    });
+    expect(opened.statusCode).toBe(200);
+    expect(
+      (await app.inject({ url: '/v1/me/support', cookies: { session: other.token } })).json().cases,
+    ).toHaveLength(0);
+    const exported = await app.inject({
+      url: '/v1/me/export',
+      cookies: { session: session.token },
+    });
+    expect(exported.statusCode).toBe(200);
+    expect(exported.json().profile[0].id).toBe(id);
+    expect(exported.body).not.toContain('password_hash');
+    expect(
+      (await app.inject({ url: '/v1/me/history', cookies: { session: session.token } })).statusCode,
+    ).toBe(200);
+    const deleted = await app.inject({
+      method: 'POST',
+      url: '/v1/me/anonymize',
+      cookies: { session: session.token },
+      headers,
+      payload: { password: 'test-password-1234', confirmation: 'EXCLUIR MINHA CONTA' },
+    });
+    expect(deleted.statusCode).toBe(200);
+    await expect(authenticate(pool, session.token)).rejects.toThrow('UNAUTHENTICATED');
+    expect((await pool.query('SELECT email,blocked FROM users WHERE id=$1', [id])).rows[0]).toEqual(
+      { email: `deleted+${id}@invalid.example`, blocked: true },
+    );
+    expect(
+      (await pool.query('SELECT balance::text FROM wallets WHERE user_id=$1', [id])).rows[0]
+        .balance,
+    ).toBe('100000');
+  });
+  for (const variant of [80, 90] as const)
+    it(`liquida bingo ${variant} com sequência e prêmios verificáveis`, async () => {
+      const id = await player(`variant-${variant}@example.test`);
+      const room = await createRoom(pool, key, id, input({ variant }));
+      await purchase(pool, key, id, room.id, 1, `variant-${variant}`);
+      await endSales(room.id);
+      await advanceRound(pool, key, room.id);
+      for (let i = 0; i < variant; i++) {
+        await forceDue(room.id);
+        await advanceRound(pool, key, room.id);
+        if (
+          (await pool.query('SELECT state FROM game_rounds WHERE id=$1', [room.id])).rows[0]
+            .state === 'COMPLETED'
+        )
+          break;
+      }
+      expect((await proof(pool, room.id)).valid).toBe(true);
+      expect(
+        (
+          await pool.query(
+            'SELECT sum(amount)::text AS total,count(DISTINCT pattern)::int AS patterns FROM prize_awards WHERE round_id=$1',
+            [room.id],
+          )
+        ).rows[0],
+      ).toEqual({ total: '8500', patterns: variant === 90 ? 3 : 1 });
+      const states = (
+        await pool.query('SELECT to_state FROM round_state_changes WHERE round_id=$1', [room.id])
+      ).rows.map((r) => r.to_state);
+      expect(states).toEqual(
+        expect.arrayContaining([
+          'SCHEDULED',
+          'OPEN_FOR_SALES',
+          'SALES_CLOSED',
+          'READY',
+          'DRAWING',
+          'VERIFYING',
+          'SETTLING',
+          'COMPLETED',
+        ]),
+      );
+    });
+});
