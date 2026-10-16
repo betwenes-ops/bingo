@@ -10,6 +10,7 @@ import {
   algorithmVersion,
 } from '@bingo/domain/rng';
 import { paytable, exactReturn, type PayPattern } from '@bingo/bingo-math';
+import { instantVersion } from './catalog';
 import { transaction, AppError } from './db';
 import { wallet, postLedger, moveBalance, checkLimits, audit } from './wallet';
 const table = paytable();
@@ -33,12 +34,21 @@ export function publicInstantGame() {
   };
 }
 export async function instantCommit(pool: pg.Pool, key: string, userId: string) {
-  const seed = newSeed();
-  const row = await pool.query<{ id: string }>(
-    'INSERT INTO instant_commitments(user_id,commitment,seed_encrypted) VALUES($1,$2,$3) RETURNING id',
-    [userId, hash(seed), encryptSeed(seed, key)],
-  );
-  return { id: row.rows[0]!.id, commitment: hash(seed), algorithmVersion };
+  return transaction(pool, async (tx) => {
+    const version = await instantVersion(tx);
+    const seed = newSeed();
+    const row = await tx.query<{ id: string }>(
+      'INSERT INTO instant_commitments(user_id,commitment,seed_encrypted,version_id) VALUES($1,$2,$3,$4) RETURNING id',
+      [userId, hash(seed), encryptSeed(seed, key), version.id],
+    );
+    return {
+      id: row.rows[0]!.id,
+      commitment: hash(seed),
+      algorithmVersion,
+      version: table.version,
+      versionId: version.id,
+    };
+  });
 }
 export async function playInstant(
   pool: pg.Pool,
@@ -57,6 +67,7 @@ export async function playInstant(
       seed_encrypted: string;
       used_at: Date | null;
       valid: boolean;
+      version_id: string;
     }>(
       'SELECT *,expires_at>clock_timestamp() AS valid FROM instant_commitments WHERE id=$1 AND user_id=$2 FOR UPDATE',
       [commitmentId, userId],
@@ -74,6 +85,11 @@ export async function playInstant(
       return prior.rows[0]!.response;
     }
     const commit = c.rows[0]!;
+    const version = await tx.query<{ version: string }>(
+      'SELECT version FROM game_versions WHERE id=$1',
+      [commit.version_id],
+    );
+    if (version.rows[0]?.version !== table.version) throw new AppError('VERSION_UNAVAILABLE', 409);
     if (commit.used_at || !commit.valid) throw new AppError('COMMITMENT_EXPIRED', 409);
     await checkLimits(tx, userId, stake);
     if (BigInt(w.balance) < stake) throw new AppError('INSUFFICIENT_CREDITS', 409);

@@ -8,8 +8,8 @@ try {
   );
   await pool.query(`GRANT USAGE ON SCHEMA public TO bingo_app;
 GRANT SELECT,INSERT ON ALL TABLES IN SCHEMA public TO bingo_app;
-GRANT UPDATE ON users,user_sessions,wallets,responsible_gaming_limits,game_rounds,mfa_credentials,instant_commitments,email_outbox,outbox_events TO bingo_app;
-GRANT DELETE ON user_sessions,identity_tokens TO bingo_app;
+GRANT UPDATE ON users,user_sessions,wallets,responsible_gaming_limits,game_rounds,mfa_credentials,instant_commitments,email_outbox,outbox_events,games,admin_adjustments,support_cases,notifications,room_schedules,wallet_reservations TO bingo_app;
+GRANT DELETE ON user_sessions,identity_tokens,mfa_credentials TO bingo_app;
 REVOKE ALL ON schema_migrations FROM bingo_app;`);
   console.log('Local least-privilege runtime role provisioned.');
 } finally {

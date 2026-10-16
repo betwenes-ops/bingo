@@ -7,6 +7,8 @@ import {
   type Variant,
   type Card,
   type Pattern,
+  canTransition,
+  type RoundState,
 } from '@bingo/domain';
 import {
   hash,
@@ -19,6 +21,7 @@ import {
 } from '@bingo/domain/rng';
 import { roomInput } from '@bingo/protocol';
 import type { z } from 'zod';
+import { ensureVersion } from './catalog';
 import { AppError, transaction, type Tx } from './db';
 import { wallet, moveBalance, postLedger, audit, checkLimits } from './wallet';
 
@@ -26,7 +29,10 @@ export type Round = {
   id: string;
   name: string;
   variant: Variant;
-  state: string;
+  state: RoundState;
+  opens_at: Date;
+  sales_paused: boolean;
+  version_id: string;
   price: string;
   max_cards: number;
   prize_bps: number;
@@ -43,7 +49,11 @@ export type Round = {
   current_position: number;
   event_seq: number;
   prize_account_id: string;
-  rules: { patterns: { pattern: Pattern; bps: number }[] };
+  rules: {
+    patterns: { pattern: Pattern; bps: number }[];
+    policy: 'fixed' | 'proportional';
+    fixedPrize?: string;
+  };
 };
 export async function event(tx: Tx, roundId: string, type: string, payload: unknown) {
   const seq = await tx.query<{ event_seq: number }>(
@@ -56,55 +66,121 @@ export async function event(tx: Tx, roundId: string, type: string, payload: unkn
   );
   await tx.query('INSERT INTO outbox_events(event_id) VALUES($1)', [e.rows[0]!.id]);
 }
+export async function transition(tx: Tx, id: string, from: RoundState, to: RoundState) {
+  if (!canTransition(from, to)) throw new AppError('INVALID_STATE_TRANSITION', 409);
+  await event(tx, id, 'STATE_CHANGED', { from, to });
+  const changed = await tx.query(
+    'UPDATE game_rounds SET state=$3 WHERE id=$1 AND state=$2 RETURNING id',
+    [id, from, to],
+  );
+  if (!changed.rowCount) throw new AppError('STATE_CONFLICT', 409);
+  await tx.query('INSERT INTO round_state_changes(round_id,from_state,to_state) VALUES($1,$2,$3)', [
+    id,
+    from,
+    to,
+  ]);
+}
+export async function checkpoint(tx: Tx, id: string) {
+  await tx.query(
+    `INSERT INTO round_snapshots(round_id,seq,public_state) SELECT r.id,r.event_seq,jsonb_build_object('id',r.id,'state',r.state,'position',r.current_position,'commitment',r.commitment,'balls',COALESCE((SELECT jsonb_agg(number ORDER BY position) FROM drawn_balls WHERE round_id=r.id),'[]'::jsonb)) FROM game_rounds r WHERE r.id=$1 ON CONFLICT DO NOTHING`,
+    [id],
+  );
+}
 export async function createRoom(
   pool: pg.Pool,
   key: string,
   actor: string,
   input: z.infer<typeof roomInput>,
 ) {
-  return transaction(pool, async (tx) => {
-    const seed = newSeed();
-    const account = await tx.query<{ id: string }>(
-      "INSERT INTO ledger_accounts(kind) VALUES('prize') RETURNING id",
+  return transaction(pool, (tx) => createRound(tx, key, actor, roomInput.parse(input)));
+}
+export async function createRound(
+  tx: Tx,
+  key: string,
+  actor: string,
+  input: z.infer<typeof roomInput>,
+) {
+  const seed = newSeed();
+  const account = await tx.query<{ id: string }>(
+    "INSERT INTO ledger_accounts(kind) VALUES('prize') RETURNING id",
+  );
+  const patterns =
+    input.variant === 90
+      ? [
+          { pattern: 'line', bps: 2000 },
+          { pattern: 'two-lines', bps: 3000 },
+          { pattern: 'full', bps: 5000 },
+        ]
+      : [{ pattern: input.pattern ?? 'full', bps: 10000 }];
+  const engineConfig = { variant: input.variant, algorithmVersion, patterns };
+  const version = await ensureVersion(
+    tx,
+    `bingo-${input.variant}`,
+    `v1-${hash(JSON.stringify(engineConfig)).slice(0, 12)}`,
+    engineConfig,
+    actor,
+  );
+  const rules = {
+    ...engineConfig,
+    remainder: 'card-id-ascending',
+    policy: input.prizePolicy ?? 'proportional',
+    fixedPrize: input.fixedPrize ?? null,
+    demo: true,
+  };
+  if (rules.policy === 'fixed' && (!input.fixedPrize || BigInt(input.fixedPrize) <= 0n))
+    throw new AppError('FIXED_PRIZE_REQUIRED');
+  const starts = input.startsInSeconds ?? 0;
+  const row = await tx.query<{ id: string }>(
+    `INSERT INTO game_rounds(name,variant,state,price,max_cards,prize_bps,min_players,opens_at,sales_close_at,ball_interval_ms,commitment,seed_encrypted,prize_account_id,rules,version_id) VALUES($1,$2,'CREATED',$3,$4,$5,$6,now()+($7::int*interval '1 second'),now()+(($7::int+$8::int)*interval '1 second'),$9,$10,$11,$12,$13,$14) RETURNING id`,
+    [
+      input.name,
+      input.variant,
+      input.price,
+      input.maxCards,
+      input.prizeBps,
+      input.minPlayers,
+      starts,
+      input.salesSeconds,
+      input.ballIntervalMs,
+      hash(seed),
+      encryptSeed(seed, key),
+      account.rows[0]!.id,
+      JSON.stringify(rules),
+      version.id,
+    ],
+  );
+  const id = row.rows[0]!.id;
+  if (rules.policy === 'fixed') {
+    const house = (
+      await tx.query<{ id: string }>(
+        "SELECT id FROM ledger_accounts WHERE reference='house' FOR UPDATE",
+      )
+    ).rows[0]!.id;
+    const balance = (
+      await tx.query<{ balance: string }>(
+        'SELECT COALESCE(sum(amount),0)::text AS balance FROM ledger_entries WHERE account_id=$1',
+        [house],
+      )
+    ).rows[0]!.balance;
+    const amount = BigInt(input.fixedPrize!);
+    if (BigInt(balance) < amount) throw new AppError('GUARANTEE_FUND_INSUFFICIENT', 409);
+    await postLedger(tx, 'PRIZE_RESERVATION', id, [
+      { accountId: house, amount: -amount },
+      { accountId: account.rows[0]!.id, amount },
+    ]);
+    await tx.query(
+      "INSERT INTO wallet_reservations(round_id,source_account_id,held_account_id,amount,status) VALUES($1,$2,$3,$4,'HELD')",
+      [id, house, account.rows[0]!.id, amount.toString()],
     );
-    const rules = {
-      algorithmVersion,
-      pattern: 'full',
-      patterns:
-        input.variant === 90
-          ? [
-              { pattern: 'line', bps: 2000 },
-              { pattern: 'two-lines', bps: 3000 },
-              { pattern: 'full', bps: 5000 },
-            ]
-          : [{ pattern: 'full', bps: 10000 }],
-      remainder: 'card-id-ascending',
-      policy: 'proportional',
-      demo: true,
-    };
-    const r = await tx.query<{ id: string }>(
-      `INSERT INTO game_rounds(name,variant,state,price,max_cards,prize_bps,min_players,sales_close_at,ball_interval_ms,commitment,seed_encrypted,prize_account_id,rules)
- VALUES($1,$2,'OPEN_FOR_SALES',$3,$4,$5,$6,now()+($7::int*interval '1 second'),$8,$9,$10,$11,$12) RETURNING id`,
-      [
-        input.name,
-        input.variant,
-        input.price,
-        input.maxCards,
-        input.prizeBps,
-        input.minPlayers,
-        input.salesSeconds,
-        input.ballIntervalMs,
-        hash(seed),
-        encryptSeed(seed, key),
-        account.rows[0]!.id,
-        JSON.stringify(rules),
-      ],
-    );
-    const id = r.rows[0]!.id;
-    await audit(tx, actor, 'ROOM_CREATED', id, input);
+  }
+  await audit(tx, actor, 'ROOM_CREATED', id, input);
+  await transition(tx, id, 'CREATED', 'SCHEDULED');
+  if (starts === 0) {
+    await transition(tx, id, 'SCHEDULED', 'OPEN_FOR_SALES');
     await event(tx, id, 'ROOM_OPENED', { name: input.name });
-    return { id };
-  });
+  }
+  await checkpoint(tx, id);
+  return { id };
 }
 export async function purchase(
   pool: pg.Pool,
@@ -136,6 +212,7 @@ export async function purchase(
       'SELECT $1::timestamptz>clock_timestamp() AS open',
       [round.sales_close_at],
     );
+    if (round.sales_paused) throw new AppError('SALES_PAUSED', 409);
     if (round.state !== 'OPEN_FOR_SALES' || !now.rows[0]!.open)
       throw new AppError('SALES_CLOSED', 409);
     const bought = await tx.query<{ count: string }>(
@@ -166,7 +243,7 @@ export async function purchase(
       cards.push({ id: row.rows[0]!.id, card });
     }
     // Per-purchase rounding is the published accounting basis, not rounding aggregate revenue.
-    const fund = prizeFund(total, round.prize_bps);
+    const fund = round.rules.policy === 'fixed' ? 0n : prizeFund(total, round.prize_bps);
     const house = await tx.query<{ id: string }>(
       "SELECT id FROM ledger_accounts WHERE reference='house'",
     );
@@ -190,7 +267,7 @@ export async function purchase(
     return response;
   });
 }
-async function refund(tx: Tx, round: Round) {
+async function refund(tx: Tx, round: Round, reason = 'MINIMUM_NOT_MET') {
   const purchases = await tx.query<{ id: string; user_id: string; total: string }>(
     'SELECT * FROM card_purchases WHERE round_id=$1 ORDER BY user_id,id',
     [round.id],
@@ -201,7 +278,7 @@ async function refund(tx: Tx, round: Round) {
   for (const p of purchases.rows) {
     const w = await wallet(tx, p.user_id);
     const total = BigInt(p.total),
-      fund = prizeFund(total, round.prize_bps);
+      fund = round.rules.policy === 'fixed' ? 0n : prizeFund(total, round.prize_bps);
     await postLedger(tx, 'REFUND', p.id, [
       { accountId: w.account_id, amount: total },
       { accountId: round.prize_account_id, amount: -fund },
@@ -209,13 +286,48 @@ async function refund(tx: Tx, round: Round) {
     ]);
     await moveBalance(tx, p.user_id, total);
   }
-  // Terminal rows are frozen by the database. Append the final event first;
-  // state, refund and outbox still commit atomically.
-  await event(tx, round.id, 'GAME_CANCELLED', { reason: 'MINIMUM_NOT_MET' });
-  await tx.query("UPDATE game_rounds SET state='CANCELLED',seed_revealed=$2 WHERE id=$1", [
-    round.id,
-    null,
-  ]);
+  const reserve = await tx.query<{ id: string; source_account_id: string; amount: string }>(
+    "SELECT * FROM wallet_reservations WHERE round_id=$1 AND status='HELD' FOR UPDATE",
+    [round.id],
+  );
+  if (reserve.rowCount) {
+    const held = reserve.rows[0]!;
+    await postLedger(tx, 'RESERVATION_RELEASE', held.id, [
+      { accountId: round.prize_account_id, amount: -BigInt(held.amount) },
+      { accountId: held.source_account_id, amount: BigInt(held.amount) },
+    ]);
+    await tx.query("UPDATE wallet_reservations SET status='RELEASED' WHERE id=$1", [held.id]);
+  }
+  await event(tx, round.id, 'GAME_CANCELLED', { reason });
+  await transition(tx, round.id, round.state, 'CANCELLED');
+  await checkpoint(tx, round.id);
+}
+export async function controlRoom(
+  pool: pg.Pool,
+  actor: string,
+  id: string,
+  action: 'pause' | 'resume' | 'cancel',
+  reason: string,
+) {
+  return transaction(pool, async (tx) => {
+    const result = await tx.query<Round>('SELECT * FROM game_rounds WHERE id=$1 FOR UPDATE', [id]);
+    const r = result.rows[0];
+    if (!r) throw new AppError('ROUND_NOT_FOUND', 404);
+    if (action === 'cancel' && r.state === 'CANCELLED') return { ok: true };
+    if (!['SCHEDULED', 'OPEN_FOR_SALES', 'SALES_CLOSED', 'READY'].includes(r.state))
+      throw new AppError('ROUND_CANNOT_BE_CHANGED', 409);
+    if (action === 'cancel') await refund(tx, r, reason);
+    else {
+      if (r.state !== 'OPEN_FOR_SALES') throw new AppError('SALES_NOT_OPEN', 409);
+      await tx.query('UPDATE game_rounds SET sales_paused=$2 WHERE id=$1', [
+        id,
+        action === 'pause',
+      ]);
+      await event(tx, id, 'SALES_PAUSE_CHANGED', { paused: action === 'pause' });
+    }
+    await audit(tx, actor, `ROOM_${action.toUpperCase()}`, id, { reason });
+    return { ok: true };
+  });
 }
 export async function advanceRound(pool: pg.Pool, key: string, roundId: string) {
   return transaction(pool, async (tx) => {
@@ -228,7 +340,18 @@ export async function advanceRound(pool: pg.Pool, key: string, roundId: string) 
       roundId,
     ]);
     const r = selected.rows[0];
-    if (!r || ['COMPLETED', 'CANCELLED'].includes(r.state)) return;
+    if (!r || ['COMPLETED', 'CANCELLED', 'FAILED'].includes(r.state)) return;
+    if (r.state === 'SCHEDULED') {
+      const due = await tx.query<{ due: boolean }>(
+        'SELECT $1::timestamptz<=clock_timestamp() AS due',
+        [r.opens_at],
+      );
+      if (due.rows[0]!.due) {
+        await transition(tx, r.id, 'SCHEDULED', 'OPEN_FOR_SALES');
+        await event(tx, r.id, 'ROOM_OPENED', { name: r.name });
+      }
+      return;
+    }
     const ready = await tx.query<{ due: boolean }>(
       "SELECT CASE WHEN $1='OPEN_FOR_SALES' THEN $2::timestamptz<=clock_timestamp() ELSE $3::timestamptz<=clock_timestamp() END AS due",
       [r.state, r.sales_close_at, r.next_ball_at],
@@ -250,12 +373,16 @@ export async function advanceRound(pool: pg.Pool, key: string, roundId: string) 
       const manifestHash = hash(JSON.stringify(cards.rows));
       const context = JSON.stringify([algorithmVersion, r.id, manifestHash, 0]);
       const sequence = drawSequence(decryptSeed(r.seed_encrypted, key), context, r.variant);
+      await transition(tx, r.id, 'OPEN_FOR_SALES', 'SALES_CLOSED');
       await tx.query(
-        "UPDATE game_rounds SET state='DRAWING',manifest_hash=$2,context=$3,sequence_encrypted=$4,next_ball_at=clock_timestamp() WHERE id=$1",
+        'UPDATE game_rounds SET manifest_hash=$2,context=$3,sequence_encrypted=$4,next_ball_at=clock_timestamp() WHERE id=$1',
         [r.id, manifestHash, context, encryptSeed(JSON.stringify(sequence), key)],
       );
       await event(tx, r.id, 'SALES_CLOSED', { manifestHash });
+      await transition(tx, r.id, 'SALES_CLOSED', 'READY');
+      await transition(tx, r.id, 'READY', 'DRAWING');
       await event(tx, r.id, 'GAME_STARTED', { variant: r.variant });
+      await checkpoint(tx, r.id);
       return;
     }
     if (r.state !== 'DRAWING') return;
@@ -282,7 +409,22 @@ export async function advanceRound(pool: pg.Pool, key: string, roundId: string) 
       'SELECT COALESCE(sum((total*$2::bigint)/10000),0)::text AS fund FROM card_purchases WHERE round_id=$1',
       [r.id, r.prize_bps],
     );
-    const totalFund = BigInt(revenues.rows[0]!.fund);
+    const totalFund =
+      r.rules.policy === 'fixed' ? BigInt(r.rules.fixedPrize!) : BigInt(revenues.rows[0]!.fund);
+    const completed = await tx.query<{ pattern: Pattern }>(
+      'SELECT DISTINCT pattern FROM prize_awards WHERE round_id=$1',
+      [r.id],
+    );
+    const completedSet = new Set(completed.rows.map((x) => x.pattern));
+    const finishing = r.rules.patterns.every(
+      (p) => completedSet.has(p.pattern) || cards.rows.some((c) => wins(c.card, p.pattern, drawn)),
+    );
+    if (finishing) {
+      await transition(tx, r.id, 'DRAWING', 'VERIFYING');
+      await transition(tx, r.id, 'VERIFYING', 'SETTLING');
+    }
+    for (const userId of [...new Set(cards.rows.map((c) => c.user_id))].sort())
+      await wallet(tx, userId);
     let previousAllocation = 0n;
     for (const [index, p] of r.rules.patterns.entries()) {
       const allocation =
@@ -326,26 +468,28 @@ export async function advanceRound(pool: pg.Pool, key: string, roundId: string) 
         total: allocation.toString(),
       });
     }
-    const full = await tx.query(
-      'SELECT id FROM prize_awards WHERE round_id=$1 AND pattern=$2 LIMIT 1',
-      [r.id, 'full'],
-    );
-    if (full.rowCount) {
+    if (finishing) {
       await event(tx, r.id, 'GAME_FINISHED', { position });
+      await tx.query('UPDATE game_rounds SET seed_revealed=$2,next_ball_at=NULL WHERE id=$1', [
+        r.id,
+        decryptSeed(r.seed_encrypted, key),
+      ]);
+      await transition(tx, r.id, 'SETTLING', 'COMPLETED');
       await tx.query(
-        "UPDATE game_rounds SET state='COMPLETED',seed_revealed=$2,next_ball_at=NULL WHERE id=$1",
-        [r.id, decryptSeed(r.seed_encrypted, key)],
+        "UPDATE wallet_reservations SET status='CONSUMED' WHERE round_id=$1 AND status='HELD'",
+        [r.id],
       );
       await audit(tx, null, 'ROUND_COMPLETED', r.id, { position });
     }
+    if (finishing || position % 10 === 0) await checkpoint(tx, r.id);
   });
 }
 export async function listRooms(pool: pg.Pool) {
   return (
-    await pool.query(`SELECT r.id,r.name,r.variant,r.state,r.price::text,r.max_cards,r.prize_bps,r.min_players,r.sales_close_at,r.commitment,r.current_position,r.rules,
+    await pool.query(`SELECT r.id,r.name,r.variant,r.state,r.price::text,r.max_cards,r.prize_bps,r.min_players,r.sales_close_at,r.opens_at,r.sales_paused,r.version_id,r.commitment,r.current_position,r.rules,
  (SELECT count(DISTINCT user_id)::int FROM bingo_cards WHERE round_id=r.id) AS players,
  (SELECT count(*)::int FROM bingo_cards WHERE round_id=r.id) AS cards,
- (SELECT COALESCE(sum((total*r.prize_bps)/10000),0)::text FROM card_purchases WHERE round_id=r.id) AS prize
+ (CASE WHEN r.rules->>'policy'='fixed' THEN r.rules->>'fixedPrize' ELSE (SELECT COALESCE(sum((total*r.prize_bps)/10000),0)::text FROM card_purchases WHERE round_id=r.id) END) AS prize
  FROM game_rounds r ORDER BY r.created_at DESC LIMIT 50`)
   ).rows;
 }
@@ -354,7 +498,7 @@ export async function snapshot(pool: pg.Pool, roundId: string, userId: string) {
   return transaction(pool, async (tx) => {
     await tx.query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
     const r = await tx.query(
-      'SELECT id,name,variant,state,price::text,max_cards,prize_bps,sales_close_at,commitment,current_position,event_seq,rules FROM game_rounds WHERE id=$1',
+      'SELECT id,name,variant,state,price::text,max_cards,prize_bps,sales_close_at,opens_at,sales_paused,version_id,commitment,current_position,event_seq,rules FROM game_rounds WHERE id=$1',
       [roundId],
     );
     if (!r.rowCount) throw new AppError('ROUND_NOT_FOUND', 404);
@@ -408,4 +552,25 @@ export async function proof(pool: pg.Pool, roundId: string) {
       hash(JSON.stringify(cards.rows)) === r.manifest_hash &&
       balls.rows.every((b, i) => b.number === sequence[i]),
   };
+}
+
+export async function runSchedules(pool: pg.Pool, key: string) {
+  return transaction(pool, async (tx) => {
+    const rows = await tx.query<{
+      id: string;
+      config: unknown;
+      created_by: string;
+      interval_seconds: number;
+    }>(
+      'SELECT * FROM room_schedules WHERE enabled AND next_open_at<=clock_timestamp() ORDER BY next_open_at FOR UPDATE SKIP LOCKED LIMIT 10',
+    );
+    for (const schedule of rows.rows) {
+      await createRound(tx, key, schedule.created_by, roomInput.parse(schedule.config));
+      await tx.query(
+        "UPDATE room_schedules SET next_open_at=clock_timestamp()+($2::int*interval '1 second') WHERE id=$1",
+        [schedule.id, schedule.interval_seconds],
+      );
+    }
+    return rows.rowCount;
+  });
 }

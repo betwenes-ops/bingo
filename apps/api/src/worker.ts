@@ -2,7 +2,7 @@ import { Redis } from 'ioredis';
 import nodemailer from 'nodemailer';
 import { readConfig } from './config';
 import { database, transaction } from './db';
-import { advanceRound } from './rooms';
+import { advanceRound, runSchedules } from './rooms';
 const config = readConfig();
 const { pool } = database(config.DATABASE_URL);
 const redis = new Redis(config.REDIS_URL, { maxRetriesPerRequest: 1, lazyConnect: true });
@@ -17,8 +17,9 @@ process.on('SIGTERM', () => {
 });
 while (running) {
   try {
+    await runSchedules(pool, config.SEED_ENCRYPTION_KEY);
     const rounds = await pool.query<{ id: string }>(
-      "SELECT id FROM game_rounds WHERE (state='OPEN_FOR_SALES' AND sales_close_at<=now()) OR (state='DRAWING' AND next_ball_at<=now()) ORDER BY COALESCE(next_ball_at,sales_close_at) LIMIT 100",
+      "SELECT id FROM game_rounds WHERE (state='SCHEDULED' AND opens_at<=now()) OR (state='OPEN_FOR_SALES' AND sales_close_at<=now()) OR (state='DRAWING' AND next_ball_at<=now()) ORDER BY COALESCE(next_ball_at,sales_close_at) LIMIT 100",
     );
     for (const r of rounds.rows) {
       try {

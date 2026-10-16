@@ -19,6 +19,10 @@ export const roomInput = z.object({
   maxCards: z.number().int().min(1).max(24),
   prizeBps: z.number().int().min(1).max(10000),
   minPlayers: z.number().int().min(1).max(100),
+  startsInSeconds: z.number().int().min(0).max(604800).optional(),
+  pattern: z.enum(['line', 'column', 'diagonal', 'corners', 'x', 'l', 'full']).optional(),
+  prizePolicy: z.enum(['proportional', 'fixed']).optional(),
+  fixedPrize: credits.optional(),
 });
 export const eventEnvelope = z.object({
   v: z.literal(1),

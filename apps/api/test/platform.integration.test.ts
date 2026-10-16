@@ -7,7 +7,8 @@ import { readConfig } from '../src/config';
 import { recovery, resetPassword, authenticate } from '../src/identity';
 import { register, verifyEmail, login, totpCode, base32 } from '../src/identity';
 import { instantCommit, playInstant } from '../src/instant';
-import { createRoom, purchase, advanceRound, proof } from '../src/rooms';
+import { createRoom, purchase, advanceRound, proof, controlRoom } from '../src/rooms';
+import { requestAdjustment, decideAdjustment } from '../src/operations';
 import { postLedger } from '../src/wallet';
 import { encryptSeed, hash, drawSequence } from '@bingo/domain/rng';
 import { spawn, execFileSync } from 'node:child_process';
@@ -89,7 +90,7 @@ afterAll(async () => {
 describe('PostgreSQL real: identidade, integridade e recuperação', () => {
   it('migrações são idempotentes', async () => {
     await migrate(pool);
-    expect((await pool.query('SELECT * FROM schema_migrations')).rowCount).toBe(2);
+    expect((await pool.query('SELECT * FROM schema_migrations')).rowCount).toBe(3);
   });
   it('confirmação concede créditos uma única vez e recuperação revoga sessões', async () => {
     const id = await player('identity@example.test');
@@ -407,5 +408,90 @@ describe('PostgreSQL real: identidade, integridade e recuperação', () => {
     expect(
       (await pool.query('SELECT sum(amount)::text AS total FROM ledger_entries')).rows[0].total,
     ).toBe('0');
+  });
+});
+
+describe('Operação financeira e versões publicadas', () => {
+  it('exige duas pessoas, aplica uma única vez e preserva a solicitação', async () => {
+    const a = await player('finance-a@example.test');
+    const b = await player('finance-b@example.test');
+    const user = await player('adjusted@example.test');
+    await pool.query("UPDATE users SET role='finance' WHERE id=ANY($1::uuid[])", [[a, b]]);
+    const request = await requestAdjustment(
+      pool,
+      a,
+      user,
+      1234n,
+      'Correção demonstrativa auditada',
+    );
+    await expect(decideAdjustment(pool, a, request.id, true, 'Aprovar')).rejects.toThrow(
+      'TWO_PERSON_REQUIRED',
+    );
+    await expect(requestAdjustment(pool, user, user, 1n, 'Sem permissão')).rejects.toThrow(
+      'ADMIN_FORBIDDEN',
+    );
+    const result = await decideAdjustment(
+      pool,
+      b,
+      request.id,
+      true,
+      'Conferido por segunda pessoa',
+    );
+    expect(await decideAdjustment(pool, b, request.id, true, 'Repetição')).toEqual(result);
+    expect(
+      (await pool.query('SELECT balance::text FROM wallets WHERE user_id=$1', [user])).rows[0]
+        .balance,
+    ).toBe('101234');
+    await expect(
+      pool.query("UPDATE admin_adjustments SET reason='alterado' WHERE id=$1", [request.id]),
+    ).rejects.toThrow('ADJUSTMENT_TERMINAL');
+    const debit = await requestAdjustment(pool, a, user, -200000n, 'Débito além do saldo');
+    await expect(decideAdjustment(pool, b, debit.id, true, 'Conferido')).rejects.toThrow();
+    expect(
+      (await pool.query('SELECT status FROM admin_adjustments WHERE id=$1', [debit.id])).rows[0]
+        .status,
+    ).toBe('PENDING');
+  });
+  it('reserva prêmio fixo e estorna compra e reserva ao cancelar', async () => {
+    const a = (await pool.query("SELECT id FROM users WHERE email='finance-a@example.test'"))
+      .rows[0].id;
+    const b = (await pool.query("SELECT id FROM users WHERE email='finance-b@example.test'"))
+      .rows[0].id;
+    const user = await player('fixed@example.test');
+    const fund = await requestAdjustment(
+      pool,
+      a,
+      null,
+      500000n,
+      'Reserva demonstrativa para prêmio',
+    );
+    await decideAdjustment(pool, b, fund.id, true, 'Reserva conferida');
+    const room = await createRoom(
+      pool,
+      key,
+      a,
+      input({ prizePolicy: 'fixed', fixedPrize: '200000' }),
+    );
+    await purchase(pool, key, user, room.id, 1, 'fixed-purchase');
+    await controlRoom(pool, a, room.id, 'pause', 'Pausa operacional');
+    await expect(purchase(pool, key, user, room.id, 1, 'paused-purchase')).rejects.toThrow();
+    await controlRoom(pool, a, room.id, 'cancel', 'Cancelamento operacional');
+    expect(
+      (await pool.query('SELECT balance::text FROM wallets WHERE user_id=$1', [user])).rows[0]
+        .balance,
+    ).toBe('100000');
+    expect(
+      (await pool.query('SELECT status FROM wallet_reservations WHERE round_id=$1', [room.id]))
+        .rows[0].status,
+    ).toBe('RELEASED');
+    await controlRoom(pool, a, room.id, 'cancel', 'Repetição idempotente');
+    const version = (await pool.query('SELECT version_id FROM game_rounds WHERE id=$1', [room.id]))
+      .rows[0].version_id;
+    await expect(
+      pool.query("UPDATE game_versions SET config='{}' WHERE id=$1", [version]),
+    ).rejects.toThrow('APPEND_ONLY');
+    await expect(
+      pool.query("UPDATE game_rounds SET state='DRAWING' WHERE id=$1", [room.id]),
+    ).rejects.toThrow('ROUND_TERMINAL');
   });
 });

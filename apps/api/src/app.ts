@@ -1,4 +1,6 @@
 import Fastify from 'fastify';
+import { managementRoutes } from './management-routes';
+import { requireRole } from './operations';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -92,7 +94,7 @@ export async function buildApp(pool: pg.Pool, config: Config) {
   ) => {
     const user = write ? await mutation(request) : await current(request);
     if (
-      !['superadmin', 'operator', 'auditor'].includes(user.role) ||
+      !['superadmin', 'operator', 'auditor', 'finance', 'support'].includes(user.role) ||
       !user.mfa_verified ||
       (write && user.role === 'auditor')
     )
@@ -441,6 +443,7 @@ export async function buildApp(pool: pg.Pool, config: Config) {
   });
   app.post('/v1/admin/rooms', { schema: { body: roomInput } }, async (req) => {
     const u = await admin(req, true);
+    requireRole(u, ['superadmin', 'operator']);
     return createRoom(pool, config.SEED_ENCRYPTION_KEY, u.id, req.body);
   });
   app.get('/v1/admin/users', async (req) => {
@@ -458,6 +461,7 @@ export async function buildApp(pool: pg.Pool, config: Config) {
   });
   app.post('/v1/admin/reconcile', async (req) => {
     const u = await admin(req, true);
+    requireRole(u, ['superadmin', 'finance']);
     return transaction(pool, async (tx) => {
       const result = await tx.query(
         `SELECT w.user_id,w.balance::text,COALESCE(sum(e.amount),0)::text AS ledger FROM wallets w LEFT JOIN ledger_entries e ON e.account_id=w.account_id GROUP BY w.user_id,w.balance HAVING w.balance<>COALESCE(sum(e.amount),0)`,
@@ -469,5 +473,6 @@ export async function buildApp(pool: pg.Pool, config: Config) {
       return { consistent: result.rows.length === 0, discrepancies: result.rows };
     });
   });
+  await managementRoutes(app, pool, config);
   return app;
 }
