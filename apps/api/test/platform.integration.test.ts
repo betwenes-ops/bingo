@@ -378,6 +378,38 @@ describe('PostgreSQL real: identidade, integridade e recuperação', () => {
     ).toBe(403);
     expect(b).not.toBe(a);
   });
+  it('busca administrativa encontra contas além dos 100 registros iniciais e pagina sem repetir', async () => {
+    const target = await player('directory-target@example.test');
+    const root = await player('directory-root@example.test');
+    await pool.query("UPDATE users SET role='auditor' WHERE id=$1", [root]);
+    const session = await login(pool, 'directory-root@example.test', 'test-password-1234', key);
+    await pool.query('UPDATE user_sessions SET mfa_verified=true WHERE token_hash=$1', [
+      hash(session.token),
+    ]);
+    await transaction(pool, async (tx) => {
+      await tx.query(`WITH people AS (
+        INSERT INTO users(email,password_hash,email_verified)
+        SELECT 'directory-'||n||'@example.test','TEST_FIXTURE_NO_PASSWORD',true FROM generate_series(1,105) AS n RETURNING id
+      ), accounts AS (
+        INSERT INTO ledger_accounts(owner_id,kind) SELECT id,'user' FROM people RETURNING id,owner_id
+      ) INSERT INTO wallets(user_id,account_id) SELECT owner_id,id FROM accounts`);
+    });
+    const get = (query: string) =>
+      app.inject({ url: '/v1/admin/users' + query, cookies: { session: session.token } });
+    const first = (await get('')).json();
+    expect(first).toHaveLength(100);
+    expect(first.some((u: { id: string }) => u.id === target)).toBe(false);
+    const filtered = await get('?q=DIRECTORY-TARGET');
+    expect(filtered.statusCode).toBe(200);
+    expect(filtered.json()).toMatchObject([{ id: target }]);
+    expect((await get('?q=' + target)).json()).toMatchObject([{ id: target }]);
+    const pageA = (await get('?q=directory-&offset=0')).json() as { id: string }[];
+    const pageB = (await get('?q=directory-&offset=100')).json() as { id: string }[];
+    expect(pageA).toHaveLength(100);
+    expect(pageB).toHaveLength(7);
+    expect(pageB.some((u) => pageA.some((v) => v.id === u.id))).toBe(false);
+    expect((await get('?offset=-1')).statusCode).toBe(400);
+  });
   it('limites e autoexclusão bloqueiam participação sem alterar cartelas existentes', async () => {
     const id = await player('limits@example.test');
     const room = await createRoom(pool, key, id, input());

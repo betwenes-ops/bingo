@@ -68,6 +68,14 @@ test('admin com MFA publica recorrência e exige uma segunda pessoa no financeir
     await expect(
       page.getByRole('button', { name: 'Operação e suporte', exact: true }),
     ).toBeVisible();
+    await page.getByRole('button', { name: 'Usuários', exact: true }).click();
+    await page.getByLabel('Buscar por e-mail ou ID').fill(b.email.toUpperCase());
+    await page.getByRole('button', { name: 'Buscar usuários', exact: true }).click();
+    await expect(page.getByRole('row').filter({ hasText: b.email })).toBeVisible();
+    await expect(page.getByRole('row').filter({ hasText: a.email })).toHaveCount(0);
+    await page.getByLabel('Buscar por e-mail ou ID').fill(b.id);
+    await page.getByRole('button', { name: 'Buscar usuários', exact: true }).click();
+    await expect(page.getByRole('row').filter({ hasText: b.email })).toBeVisible();
     await page.getByRole('button', { name: 'Salas e rodadas', exact: true }).click();
     await page.getByRole('button', { name: 'Nova sala', exact: true }).click();
     const roomName = `Recorrência E2E ${randomUUID().slice(0, 8)}`;

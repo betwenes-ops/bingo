@@ -562,14 +562,26 @@ export async function buildApp(pool: pg.Pool, config: Config) {
     requireRole(u, ['superadmin', 'operator']);
     return createRoom(pool, config.SEED_ENCRYPTION_KEY, u.id, req.body);
   });
-  app.get('/v1/admin/users', async (req) => {
-    await admin(req);
-    return (
-      await pool.query(
-        'SELECT u.id,u.email,u.role,u.blocked,u.email_verified,u.created_at,w.balance::text FROM users u JOIN wallets w ON w.user_id=u.id ORDER BY u.created_at DESC LIMIT 100',
-      )
-    ).rows;
-  });
+  app.get(
+    '/v1/admin/users',
+    {
+      schema: {
+        querystring: z.object({
+          q: z.string().trim().max(254).default(''),
+          offset: z.coerce.number().int().min(0).max(1000000).default(0),
+        }),
+      },
+    },
+    async (req) => {
+      await admin(req);
+      return (
+        await pool.query(
+          "SELECT u.id,u.email,u.role,u.blocked,u.email_verified,u.created_at,w.balance::text FROM users u JOIN wallets w ON w.user_id=u.id WHERE ($1='' OR strpos(lower(u.email),lower($1))>0 OR u.id::text=lower($1)) ORDER BY u.created_at DESC,u.id DESC LIMIT 100 OFFSET $2",
+          [req.query.q, req.query.offset],
+        )
+      ).rows;
+    },
+  );
   app.get('/v1/admin/audit', async (req) => {
     await admin(req);
     return (await pool.query('SELECT * FROM audit_logs ORDER BY created_at DESC,id DESC LIMIT 100'))

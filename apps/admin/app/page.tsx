@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -51,29 +51,40 @@ export default function Admin() {
     [success, setSuccess] = useState(''),
     [busy, setBusy] = useState(false),
     [creating, setCreating] = useState(false),
-    [query, setQuery] = useState('');
+    [query, setQuery] = useState(''),
+    [userSearch, setUserSearch] = useState(''),
+    [userOffset, setUserOffset] = useState(0),
+    [usersLoading, setUsersLoading] = useState(false);
+  const refreshVersion = useRef(0);
   const refreshUser = useCallback(() => {
     void api<User>('/v1/me')
       .then(setUser)
       .catch(() => setUser(null));
   }, []);
   const refresh = useCallback(async () => {
+    const version = ++refreshVersion.current;
+    setUsersLoading(true);
     setError('');
     try {
       const [s, r, u, a] = await Promise.all([
         api<Summary>('/v1/admin/summary'),
         api<{ rooms: Room[] }>('/v1/rooms'),
-        api<AdminUser[]>('/v1/admin/users'),
+        api<AdminUser[]>(
+          `/v1/admin/users?q=${encodeURIComponent(userSearch)}&offset=${userOffset}`,
+        ),
         api<Audit[]>('/v1/admin/audit'),
       ]);
+      if (version !== refreshVersion.current) return;
       setSummary(s);
       setRooms(r.rooms);
       setUsers(u);
       setAudit(a);
     } catch (e) {
-      setError((e as Error).message);
+      if (version === refreshVersion.current) setError((e as Error).message);
+    } finally {
+      if (version === refreshVersion.current) setUsersLoading(false);
     }
-  }, []);
+  }, [userSearch, userOffset]);
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
@@ -81,7 +92,10 @@ export default function Admin() {
     if (user && user.role !== 'player' && user.mfaEnabled) {
       void refresh();
       const t = setInterval(() => void refresh(), 10000);
-      return () => clearInterval(t);
+      return () => {
+        clearInterval(t);
+        refreshVersion.current++;
+      };
     }
   }, [user, refresh]);
   async function reconcile() {
@@ -472,15 +486,50 @@ export default function Admin() {
             )}
             {tab === 'users' && (
               <section className="table-panel">
-                <label>
-                  Buscar por e-mail
-                  <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="E-mail do usuário"
-                  />
-                </label>
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const next = query.trim();
+                    if (next === userSearch && userOffset === 0) void refresh();
+                    else {
+                      setUserSearch(next);
+                      setUserOffset(0);
+                    }
+                  }}
+                >
+                  <label>
+                    Buscar por e-mail ou ID
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      maxLength={254}
+                      placeholder="E-mail ou ID do usuário"
+                    />
+                  </label>
+                  <button className="secondary" disabled={usersLoading}>
+                    Buscar usuários
+                  </button>
+                </form>
+                <p role="status">
+                  {usersLoading
+                    ? 'Buscando usuários…'
+                    : `Página ${userOffset / 100 + 1} · ${users.length} usuários nesta página`}
+                </p>
+                <button
+                  className="secondary"
+                  disabled={usersLoading || userOffset === 0}
+                  onClick={() => setUserOffset((value) => Math.max(0, value - 100))}
+                >
+                  Página anterior
+                </button>
+                <button
+                  className="secondary"
+                  disabled={usersLoading || users.length < 100}
+                  onClick={() => setUserOffset((value) => value + 100)}
+                >
+                  Próxima página
+                </button>
                 <div className="table-scroll">
                   <table>
                     <thead>
@@ -493,20 +542,23 @@ export default function Admin() {
                       </tr>
                     </thead>
                     <tbody>
-                      {users
-                        .filter((u) => u.email.toLowerCase().includes(query.toLowerCase()))
-                        .map((u) => (
-                          <tr key={u.id}>
-                            <td>
-                              {u.email}
-                              <small className="hash-value">{u.id}</small>
-                            </td>
-                            <td>{u.role}</td>
-                            <td>{u.email_verified ? 'Confirmado' : 'Pendente'}</td>
-                            <td>{u.blocked ? 'Bloqueado' : 'Ativo'}</td>
-                            <td>{credits(u.balance)}</td>
-                          </tr>
-                        ))}
+                      {!usersLoading && users.length === 0 && (
+                        <tr>
+                          <td colSpan={5}>Nenhum usuário encontrado.</td>
+                        </tr>
+                      )}
+                      {users.map((u) => (
+                        <tr key={u.id}>
+                          <td>
+                            {u.email}
+                            <small className="hash-value">{u.id}</small>
+                          </td>
+                          <td>{u.role}</td>
+                          <td>{u.email_verified ? 'Confirmado' : 'Pendente'}</td>
+                          <td>{u.blocked ? 'Bloqueado' : 'Ativo'}</td>
+                          <td>{credits(u.balance)}</td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
