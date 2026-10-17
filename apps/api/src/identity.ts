@@ -72,14 +72,27 @@ async function tokenEmail(
     `Bingo Demonstração.\n\n${link}\n\nO link expira em 30 minutos. Créditos fictícios sem valor monetário.`,
   ]);
 }
+async function consumeIdentityToken(tx: Tx, token: string, purpose: 'verify' | 'reset') {
+  const digest = hash(token);
+  const found = await tx.query<{ user_id: string }>(
+    'SELECT user_id FROM identity_tokens WHERE token_hash=$1 AND purpose=$2 AND expires_at>now()',
+    [digest, purpose],
+  );
+  if (!found.rowCount) throw new AppError('TOKEN_INVALID');
+  const id = found.rows[0]!.user_id;
+  // Use the same lock order as account closure and session creation. Concurrent
+  // reset links cannot each hold a token while waiting for the other's user lock.
+  await tx.query('SELECT id FROM users WHERE id=$1 FOR UPDATE', [id]);
+  const consumed = await tx.query(
+    'DELETE FROM identity_tokens WHERE token_hash=$1 AND purpose=$2 AND user_id=$3 AND expires_at>now() RETURNING user_id',
+    [digest, purpose, id],
+  );
+  if (!consumed.rowCount) throw new AppError('TOKEN_INVALID');
+  return id;
+}
 export async function verifyEmail(pool: pg.Pool, token: string) {
   return transaction(pool, async (tx) => {
-    const result = await tx.query<{ user_id: string }>(
-      "DELETE FROM identity_tokens WHERE token_hash=$1 AND purpose='verify' AND expires_at>now() RETURNING user_id",
-      [hash(token)],
-    );
-    if (!result.rowCount) throw new AppError('TOKEN_INVALID', 400);
-    const userId = result.rows[0]!.user_id;
+    const userId = await consumeIdentityToken(tx, token, 'verify');
     const changed = await tx.query(
       'UPDATE users SET email_verified=true WHERE id=$1 AND email_verified=false RETURNING id',
       [userId],
@@ -112,6 +125,31 @@ export async function recovery(pool: pg.Pool, email: string, webUrl: string) {
   });
   return { message: 'Se a conta existir, enviaremos as instruções.' };
 }
+export async function resendVerification(pool: pg.Pool, email: string, webUrl: string) {
+  await transaction(pool, async (tx) => {
+    const user = await tx.query<{
+      id: string;
+      email: string;
+      email_verified: boolean;
+      blocked: boolean;
+    }>('SELECT id,email,email_verified,blocked FROM users WHERE email=lower($1) FOR UPDATE', [
+      email,
+    ]);
+    const account = user.rows[0];
+    if (!account || account.email_verified || account.blocked) return;
+    const recent = await tx.query(
+      "SELECT 1 FROM identity_tokens WHERE user_id=$1 AND purpose='verify' AND expires_at>now()+interval '29 minutes' LIMIT 1",
+      [account.id],
+    );
+    if (recent.rowCount) return;
+    await tokenEmail(tx, account.id, account.email, 'verify', webUrl);
+    await audit(tx, account.id, 'VERIFICATION_REQUESTED', account.id);
+  });
+  return {
+    message:
+      'Se houver uma conta aguardando confirmação, enviaremos um novo link. Aguarde um minuto entre solicitações.',
+  };
+}
 export async function resetPassword(pool: pg.Pool, token: string, password: string) {
   const passwordHash = await argon2.hash(password, {
     type: argon2.argon2id,
@@ -120,12 +158,7 @@ export async function resetPassword(pool: pg.Pool, token: string, password: stri
     parallelism: 1,
   });
   await transaction(pool, async (tx) => {
-    const t = await tx.query<{ user_id: string }>(
-      "DELETE FROM identity_tokens WHERE token_hash=$1 AND purpose='reset' AND expires_at>now() RETURNING user_id",
-      [hash(token)],
-    );
-    if (!t.rowCount) throw new AppError('TOKEN_INVALID');
-    const id = t.rows[0]!.user_id;
+    const id = await consumeIdentityToken(tx, token, 'reset');
     await tx.query('UPDATE users SET password_hash=$2 WHERE id=$1', [id, passwordHash]);
     await tx.query('DELETE FROM user_sessions WHERE user_id=$1', [id]);
     await tx.query("DELETE FROM identity_tokens WHERE user_id=$1 AND purpose='reset'", [id]);
@@ -188,6 +221,18 @@ export async function login(
   if (!user || !valid || user.blocked) throw new AppError('INVALID_CREDENTIALS', 401);
   if (!user.email_verified) throw new AppError('EMAIL_NOT_VERIFIED', 403);
   return transaction(pool, async (tx) => {
+    // Serialize session creation with password changes, blocking and verification.
+    // Argon2 stays outside the lock, but the checked credential must still be current.
+    const current = (
+      await tx.query<{
+        password_hash: string;
+        blocked: boolean;
+        email_verified: boolean;
+      }>('SELECT password_hash,blocked,email_verified FROM users WHERE id=$1 FOR UPDATE', [user.id])
+    ).rows[0];
+    if (!current || current.blocked || current.password_hash !== user.password_hash)
+      throw new AppError('INVALID_CREDENTIALS', 401);
+    if (!current.email_verified) throw new AppError('EMAIL_NOT_VERIFIED', 403);
     const mfa = await tx.query<{ enabled: boolean }>(
       'SELECT enabled FROM mfa_credentials WHERE user_id=$1',
       [user.id],

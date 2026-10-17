@@ -5,6 +5,8 @@ import { migrate } from '../src/migrate';
 import { buildApp } from '../src/app';
 import { readConfig } from '../src/config';
 import { recovery, resetPassword, authenticate } from '../src/identity';
+import { resendVerification } from '../src/identity';
+import argon2 from 'argon2';
 import { register, verifyEmail, login, totpCode, base32 } from '../src/identity';
 import { instantCommit, playInstant } from '../src/instant';
 import { createRoom, purchase, advanceRound, proof, controlRoom } from '../src/rooms';
@@ -123,6 +125,123 @@ describe('PostgreSQL real: identidade, integridade e recuperação', () => {
     );
     expect(
       (await login(pool, 'identity@example.test', 'changed-password-1234', key)).token,
+    ).toHaveLength(64);
+  });
+  it('reenvia confirmação expirada sem revelar contas, duplicar envios concorrentes ou créditos', async () => {
+    const email = 'resend-confirmation@example.test';
+    await register(pool, email, 'test-password-1234', origin);
+    const id = (await pool.query('SELECT id FROM users WHERE email=$1', [email])).rows[0].id;
+    await pool.query(
+      "UPDATE identity_tokens SET expires_at=now()-interval '1 minute' WHERE user_id=$1",
+      [id],
+    );
+    const results = await Promise.all([
+      resendVerification(pool, email, origin),
+      resendVerification(pool, email.toUpperCase(), origin),
+      resendVerification(pool, 'unknown-confirmation@example.test', origin),
+    ]);
+    expect(results[0]).toEqual(results[1]);
+    expect(results[0]).toEqual(results[2]);
+    const emails = (
+      await pool.query(
+        'SELECT body FROM email_outbox WHERE recipient=$1 ORDER BY created_at DESC',
+        [email],
+      )
+    ).rows;
+    expect(emails).toHaveLength(2);
+    const token = /verify=([a-f0-9]{64})/.exec(emails[0].body)![1]!;
+    await verifyEmail(pool, token);
+    await expect(verifyEmail(pool, token)).rejects.toThrow('TOKEN_INVALID');
+    await resendVerification(pool, email, origin);
+    expect(
+      (await pool.query('SELECT count(*)::int AS n FROM email_outbox WHERE recipient=$1', [email]))
+        .rows[0].n,
+    ).toBe(2);
+    expect(
+      (await pool.query('SELECT balance::text FROM wallets WHERE user_id=$1', [id])).rows[0]
+        .balance,
+    ).toBe('100000');
+  });
+  it('não cria sessão com senha antiga quando a credencial muda durante o login', async () => {
+    const email = 'concurrent-password@example.test';
+    const id = await player(email);
+    const replacement = await argon2.hash('replacement-password-1234', {
+      type: argon2.argon2id,
+      memoryCost: 19456,
+      timeCost: 2,
+      parallelism: 1,
+    });
+    const lock = await pool.connect();
+    let pending: Promise<{ error?: Error; token?: string }> | undefined;
+    try {
+      await lock.query('BEGIN');
+      await lock.query('SELECT id FROM users WHERE id=$1 FOR UPDATE', [id]);
+      const pid = (await lock.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;
+      pending = login(pool, email, 'test-password-1234', key).then(
+        ({ token }) => ({ token }),
+        (error: Error) => ({ error }),
+      );
+      let waiting = false;
+      const deadline = Date.now() + 5000;
+      while (Date.now() < deadline) {
+        if (
+          (
+            await pool.query('SELECT 1 FROM pg_stat_activity WHERE $1=ANY(pg_blocking_pids(pid))', [
+              pid,
+            ])
+          ).rowCount
+        ) {
+          waiting = true;
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      expect(waiting).toBe(true);
+      await lock.query('UPDATE users SET password_hash=$2 WHERE id=$1', [id, replacement]);
+      await lock.query('DELETE FROM user_sessions WHERE user_id=$1', [id]);
+      await lock.query('COMMIT');
+      expect((await pending).error?.message).toBe('INVALID_CREDENTIALS');
+      expect(
+        (await pool.query('SELECT count(*)::int AS n FROM user_sessions WHERE user_id=$1', [id]))
+          .rows[0].n,
+      ).toBe(0);
+      expect((await login(pool, email, 'replacement-password-1234', key)).token).toHaveLength(64);
+    } finally {
+      await lock.query('ROLLBACK');
+      lock.release();
+      await pending;
+    }
+  });
+  it('dois links de recuperação concorrentes consomem somente uma troca de senha', async () => {
+    const email = 'parallel-reset@example.test';
+    const id = await player(email);
+    await recovery(pool, email, origin);
+    await recovery(pool, email, origin);
+    const emails = (
+      await pool.query(
+        "SELECT body FROM email_outbox WHERE recipient=$1 AND subject LIKE 'Recupere%' ORDER BY created_at",
+        [email],
+      )
+    ).rows;
+    expect(emails).toHaveLength(2);
+    const tokens = emails.map((row) => /reset=([a-f0-9]{64})/.exec(row.body)![1]!);
+    const outcomes = await Promise.allSettled(
+      tokens.map((token, i) => resetPassword(pool, token, `replacement-password-${i}-1234`)),
+    );
+    expect(outcomes.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    const rejected = outcomes.find((r) => r.status === 'rejected');
+    expect(rejected?.status === 'rejected' && rejected.reason.message).toBe('TOKEN_INVALID');
+    expect(
+      (
+        await pool.query(
+          "SELECT count(*)::int AS n FROM identity_tokens WHERE user_id=$1 AND purpose='reset'",
+          [id],
+        )
+      ).rows[0].n,
+    ).toBe(0);
+    const winner = outcomes.findIndex((r) => r.status === 'fulfilled');
+    expect(
+      (await login(pool, email, `replacement-password-${winner}-1234`, key)).token,
     ).toHaveLength(64);
   });
   it('duas compras simultâneas não gastam o mesmo saldo', async () => {

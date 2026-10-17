@@ -37,3 +37,20 @@ test('admin exige autenticação e mantém demonstração visível', async ({ pa
     scale: 'css',
   });
 });
+test('reenvio de confirmação pede somente e-mail e não revela a existência da conta', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Entrar', exact: false }).first().click();
+  await page.getByRole('button', { name: 'Reenviar confirmação', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Confirme seu e-mail.' })).toBeVisible();
+  await expect(page.getByLabel('Senha', { exact: false })).toHaveCount(0);
+  await page.getByLabel('E-mail', { exact: true }).fill('unknown-resend-e2e@example.test');
+  await page.getByRole('button', { name: 'Reenviar confirmação', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('status')).toContainText(
+    'Se houver uma conta aguardando confirmação',
+  );
+  await page.getByRole('button', { name: 'Voltar para entrar' }).click();
+  await expect(page.getByRole('dialog').getByRole('status')).toHaveCount(0);
+  await expect(page.getByLabel('Senha', { exact: false })).toBeVisible();
+});

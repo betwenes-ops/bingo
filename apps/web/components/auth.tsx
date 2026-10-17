@@ -42,7 +42,7 @@ export function Auth({
       active = false;
     };
   }, []);
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'reset'>(
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'reset' | 'confirm'>(
     resetToken ? 'reset' : 'login',
   );
   const [email, setEmail] = useState(''),
@@ -65,11 +65,14 @@ export function Auth({
         });
         setMode('login');
         setMessage('Senha atualizada. Entre com a nova senha.');
-      } else if (mode === 'forgot') {
-        const r = await api<{ message: string }>('/v1/auth/forgot-password', {
-          method: 'POST',
-          body: JSON.stringify({ email, turnstileToken: token }),
-        });
+      } else if (mode === 'forgot' || mode === 'confirm') {
+        const r = await api<{ message: string }>(
+          mode === 'confirm' ? '/v1/auth/resend-verification' : '/v1/auth/forgot-password',
+          {
+            method: 'POST',
+            body: JSON.stringify({ email, turnstileToken: token }),
+          },
+        );
         setMessage(r.message);
       } else {
         const r = await api<{ message?: string }>(`/v1/auth/${mode}`, {
@@ -114,7 +117,9 @@ export function Auth({
               ? 'Seu lugar está reservado.'
               : mode === 'reset'
                 ? 'Uma nova senha.'
-                : 'Vamos recuperar seu acesso.'}
+                : mode === 'confirm'
+                  ? 'Confirme seu e-mail.'
+                  : 'Vamos recuperar seu acesso.'}
         </h2>
         <p>Uma conta. Muitas rodadas para compartilhar.</p>
         <form onSubmit={submit}>
@@ -131,7 +136,7 @@ export function Auth({
               />
             </label>
           )}
-          {mode !== 'forgot' && (
+          {mode !== 'forgot' && mode !== 'confirm' && (
             <label>
               Senha <small>Mínimo de 12 caracteres</small>
               <input
@@ -196,7 +201,9 @@ export function Auth({
                   ? 'Criar minha conta'
                   : mode === 'reset'
                     ? 'Salvar nova senha'
-                    : 'Enviar instruções'}
+                    : mode === 'confirm'
+                      ? 'Reenviar confirmação'
+                      : 'Enviar instruções'}
             <ArrowRight size={18} />
           </button>
         </form>
@@ -206,18 +213,39 @@ export function Auth({
               <button
                 onClick={() => {
                   setMode('register');
+                  setToken('');
                   setError('');
                   setMessage('');
                 }}
               >
                 Criar conta
               </button>
-              <button onClick={() => setMode('forgot')}>Esqueci minha senha</button>
+              <button
+                onClick={() => {
+                  setMode('forgot');
+                  setToken('');
+                  setError('');
+                  setMessage('');
+                }}
+              >
+                Esqueci minha senha
+              </button>
+              <button
+                onClick={() => {
+                  setMode('confirm');
+                  setToken('');
+                  setError('');
+                  setMessage('');
+                }}
+              >
+                Reenviar confirmação
+              </button>
             </>
           ) : (
             <button
               onClick={() => {
                 setMode('login');
+                setToken('');
                 setError('');
                 setMessage('');
               }}

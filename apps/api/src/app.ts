@@ -25,6 +25,7 @@ import {
   login,
   verifyEmail,
   recovery,
+  resendVerification,
   resetPassword,
   turnstile,
   setupMfa,
@@ -199,6 +200,17 @@ export async function buildApp(pool: pg.Pool, config: Config) {
     async (req) => {
       await turnstile(config, req.body.turnstileToken, req.ip);
       return recovery(pool, req.body.email, config.PUBLIC_WEB_URL);
+    },
+  );
+  app.post(
+    '/v1/auth/resend-verification',
+    {
+      schema: { body: z.object({ email: z.email(), turnstileToken: z.string().optional() }) },
+      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
+    },
+    async (req) => {
+      await turnstile(config, req.body.turnstileToken, req.ip);
+      return resendVerification(pool, req.body.email, config.PUBLIC_WEB_URL);
     },
   );
   app.post(
