@@ -15,3 +15,15 @@ O script `apps/api/src/load-smoke.ts` admite somente ambiente test, API em local
 Esses clientes são processos WebSocket sintéticos, não navegadores renderizando 3D. Há uma única instância de API e uma sala; relógio acelerado e infraestrutura do runner diferem da hospedagem pública. Não foram medidas CPU/memória, capacidade contínua, redes móveis ou múltiplas instâncias. Não extrapolar para 5.000/10.000 clientes nem declarar certificação de capacidade de produção.
 
 Execução anterior com 100 participantes, commit 77a026f, também passou: 6.300 entregas, nenhuma divergência e latências 30/50/198 ms, duração 3.914 ms. O resultado atual é outra rodada aleatória, não uma repetição estatística selecionada para melhorar percentis.
+
+## Revalidação em 2026-10-17
+
+[Execução 39025959363](https://github.com/betwenes-ops/bingo/actions/runs/39025959363), commit a1ba061, aprovada com as correções de acesso e busca administrativa.
+
+| Participantes | Concluíram | Entregas de bolas | Lacunas / duplicações / divergências | p50 / p95 / p99   |
+| ------------- | ---------- | ----------------- | ------------------------------------ | ----------------- |
+| 100           | 100        | 6.700             | 0 / 0 / 0                            | 10 / 29 / 177 ms  |
+| 500           | 500        | 30.500            | 0 / 0 / 0                            | 26 / 95 / 327 ms  |
+| 1.000         | 1.000      | 58.000            | 0 / 0 / 0                            | 48 / 249 / 491 ms |
+
+Provas válidas. Mesma limitação de escopo: clientes sintéticos em runner isolado, chegadas espaçadas e relógio acelerado. Os valores de rodadas aleatórias não são uma comparação controlada de performance nem uma promessa para a hospedagem pública. [JSON real](reports/evidence/access-operations-2026-10-17.json).

@@ -62,13 +62,13 @@ Integração usa Testcontainers com PostgreSQL 16 real e requer Docker, ou `TEST
 ## Implementado e limites atuais
 
 - Monorepo pnpm/Turbo, TypeScript estrito, Next.js jogador/admin, Fastify, Drizzle/SQL, PostgreSQL, Redis/outbox, Mailpit, Compose e CI.
-- Cadastro, confirmação, recuperação, sessões revogáveis por API, TOTP e proteção de operações por origem/CSRF. Turnstile obrigatório em modo production.
+- Cadastro, confirmação com reenvio limitado, recuperação, sessões revogáveis por API, TOTP e proteção de operações por origem/CSRF. Turnstile obrigatório em modo production.
 - Créditos inteiros, razão balanceado no COMMIT, lançamentos imutáveis, idempotência, reconciliação e compras transacionais.
 - Cartelas e padrões 75/80/90, prêmios proporcionais e fixos com reserva integral, 90 com linha/duas linhas/cheia, rateio determinístico e recuperação persistente do sorteio.
 - Bingo individual com cálculo conjunto exato por inclusão-exclusão e tabela versionada; relatório de **1 milhão de simulações** em [instant-math.json](docs/reports/instant-math.json).
 - Lobby sem contadores inventados, sala 2D, globo Three.js opcional, carteira, limites/pausa/exclusão, painel com dupla aprovação financeira e verificador independente com WebCrypto.
 - Máquina de estados completa com trilha de transições e snapshots; versões imutáveis, agendamento/recorrência, cancelamento/estorno, papéis financeiros e suporte.
-- Histórico, atendimento privado, download dos próprios dados, notificações por API e desativação pseudonimizada. [Operação e retenção](docs/operations.md).
+- Histórico, atendimento privado, download dos próprios dados, notificações por API e desativação pseudonimizada. Busca administrativa por e-mail/ID em toda a base, com paginação; diagnóstico de configuração de envio de e-mails. [Operação e retenção](docs/operations.md).
 
 **A operação pública ainda não está pronta.** O proxy de salas foi corrigido e há deploy público, mas CAPTCHA sem configuração completa impede cadastro e faltam as credenciais de SMTP. Worker ativo e Redis autenticado já foram confirmados. Credencial SQL restrita e o fluxo público completo ainda precisam de validação no destino. O [admin público](https://bingoadmin-production.up.railway.app/) foi publicado após autorização explícita; exige conta administrativa e MFA. [Configuração Railway](docs/railway.md). Redis/fan-out, interfaces administrativas e de privacidade, PWA, áudio opcional e qualidade adaptativa já foram implementados. Permanecem gates de observabilidade operacional, rotação de chaves, revisão independente e capacidade em produção. Nenhuma capacidade de 10.000 jogadores foi medida ou prometida.
 
@@ -76,7 +76,7 @@ Integração usa Testcontainers com PostgreSQL 16 real e requer Docker, ou `TEST
 
 [Briefing](PROJECT_BRIEF.md) · [Arquitetura proposta](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Riscos](docs/RISKS.md) · [Decisões](docs/adr/README.md) · [Relatório de implementação](docs/reports/implementation-2026-10-16.md)
 
-[**CI integral aprovado: 64 testes**](https://github.com/betwenes-ops/bingo/actions/runs/38962117984): 31 locais, 23 de integração PostgreSQL e 10 de navegador, incluindo jogo, MFA administrativo, recorrência, dupla aprovação financeira e recuperação offline em desktop/celular. Build, lint, tipos, auditoria, Compose e restauração também passaram. [Carga real isolada de 100/500/1.000 clientes](docs/load-test-results.md) sem divergências. [Estado atualizado e limites](docs/STATUS.md).
+[**CI integral aprovado: 71 testes**](https://github.com/betwenes-ops/bingo/actions/runs/39025959363): 32 locais, 27 de integração PostgreSQL e 12 de navegador, incluindo jogo, MFA administrativo, recorrência, dupla aprovação financeira e recuperação offline em desktop/celular. Build, lint, tipos, auditoria, Compose e restauração também passaram. O teste SMTP adicional comprovou recebimento no Mailpit real, confirmação, login e crédito inicial único. [Revisão de acesso/operação](docs/reports/access-operations-2026-10-17.md). [Carga real isolada de 100/500/1.000 clientes](docs/load-test-results.md) sem divergências. [Estado atualizado e limites](docs/STATUS.md).
 
 [Site público](https://bingoweb-production-8b1f.up.railway.app/) disponível com os bloqueios operacionais descritos acima. Não confundir disponibilidade do lobby com cadastro e sorteio públicos já validados.
 

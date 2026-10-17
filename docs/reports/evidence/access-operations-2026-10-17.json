@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-17",
+  "commit": "a1ba06150c9534fdbb208b7d2df895ef83cfddf5",
+  "workflow": "https://github.com/betwenes-ops/bingo/actions/runs/39025959363",
+  "tests": {
+    "unit": 32,
+    "postgres": 27,
+    "browser": 12
+  },
+  "load": [
+    {
+      "participants": 100,
+      "completedClients": 100,
+      "ballDeliveries": 6700,
+      "duplicates": 0,
+      "gaps": 0,
+      "financialDiscrepancies": 0,
+      "proofValid": true,
+      "eventLatencyMs": {
+        "p50": 10,
+        "p95": 29,
+        "p99": 177
+      },
+      "durationMs": 2519,
+      "accelerated": true,
+      "scope": "Single room, real PostgreSQL and Redis, 100 synthetic users and purchases on isolated CI. Arrivals paced to preserve IP limits; draw clock accelerated. Not a production capacity certification."
+    },
+    {
+      "participants": 500,
+      "completedClients": 500,
+      "ballDeliveries": 30500,
+      "duplicates": 0,
+      "gaps": 0,
+      "financialDiscrepancies": 0,
+      "proofValid": true,
+      "eventLatencyMs": {
+        "p50": 26,
+        "p95": 95,
+        "p99": 327
+      },
+      "durationMs": 76314,
+      "accelerated": true,
+      "scope": "Single room, real PostgreSQL and Redis, 500 synthetic users and purchases on isolated CI. Arrivals paced to preserve IP limits; draw clock accelerated. Not a production capacity certification."
+    },
+    {
+      "participants": 1000,
+      "completedClients": 1000,
+      "ballDeliveries": 58000,
+      "duplicates": 0,
+      "gaps": 0,
+      "financialDiscrepancies": 0,
+      "proofValid": true,
+      "eventLatencyMs": {
+        "p50": 48,
+        "p95": 249,
+        "p99": 491
+      },
+      "durationMs": 223342,
+      "accelerated": true,
+      "scope": "Single room, real PostgreSQL and Redis, 1000 synthetic users and purchases on isolated CI. Arrivals paced to preserve IP limits; draw clock accelerated. Not a production capacity certification."
+    }
+  ],
+  "smtp": {
+    "workflow": "https://github.com/betwenes-ops/bingo/actions/runs/39026546077",
+    "jobId": 117378536276,
+    "status": "success",
+    "smtpReceived": true,
+    "emailVerified": true,
+    "loginSucceeded": true,
+    "initialCreditGrantedOnce": true,
+    "tokenReplayRejected": true,
+    "scope": "Disposable CI Compose stack with real worker and Mailpit SMTP; not external email delivery."
+  }
+}

@@ -13,7 +13,7 @@ O gateway continua consultando eventos duráveis uma vez por sala a cada segundo
 
 ## E-mail pendente
 
-Confira SMTP_URL, MAIL_FROM e autorização do domínio remetente. Mensagens têm até 12 tentativas com backoff de até uma hora. A falha de um destinatário não bloqueia os demais. Entrega externa deve ser verificada no provedor; enfileirar não significa entregar. Não copiar corpos, links de verificação ou tokens para logs. Para retentar mensagens esgotadas, o responsável pode alterar apenas os campos de tentativa/agendamento da outbox após corrigir o provedor; nunca criar novos créditos ou mudar a verificação da conta manualmente para simular entrega.
+Confira SMTP_URL, MAIL_FROM e autorização do domínio remetente. O painel Operação e suporte indica quando não há servidor externo configurado; worker ativo não comprova entrega de e-mail. Depois de corrigir o provedor, contas sem confirmação podem usar Reenviar confirmação na tela de acesso, aguardando um minuto entre solicitações. Um link novo vale 30 minutos e confirmar uma conta novamente não gera outro crédito inicial. Mensagens têm até 12 tentativas com backoff de até uma hora. A falha de um destinatário não bloqueia os demais. Entrega externa deve ser verificada no provedor; enfileirar não significa entregar. Não copiar corpos, links de verificação ou tokens para logs. Para retentar mensagens esgotadas, o responsável pode alterar apenas os campos de tentativa/agendamento da outbox após corrigir o provedor; nunca criar novos créditos ou mudar a verificação da conta manualmente para simular entrega.
 
 ## Divergência financeira
 

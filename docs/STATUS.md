@@ -1,17 +1,18 @@
 # Estado verificável da entrega
 
-Atualizado em 2026-10-16. [Bateria integral aprovada](https://github.com/betwenes-ops/bingo/actions/runs/38962117984), commit `f8e3756df96dc376a921b4618c0fee1b9fc850b5`: **64 testes e carga progressiva até 1.000 clientes**, incluindo proteção de valores reembolsáveis e isolamento do schema Supabase. As correções posteriores da porta de runtime também foram verificadas com inicialização HTTP real e deploy público.
+Atualizado em 2026-10-17. [Bateria integral aprovada](https://github.com/betwenes-ops/bingo/actions/runs/39025959363), commit `a1ba06150c9534fdbb208b7d2df895ef83cfddf5`: **71 testes e carga progressiva até 1.000 clientes**. Reenvio de confirmação, concorrência de senha/tokens, diagnóstico SMTP e busca administrativa em toda a base foram corrigidos. O teste adicional de SMTP real com worker/Mailpit, confirmação, login e crédito único também passou no job Compose [39026546077](https://github.com/betwenes-ops/bingo/actions/runs/39026546077). [Relatório da revisão](reports/access-operations-2026-10-17.md).
 
-| Verificação executada                                     | Resultado integral aprovado                       |
-| --------------------------------------------------------- | ------------------------------------------------- |
-| Instalação por lockfile, formatação, lint e TypeScript    | Passou                                            |
-| Domínio, matemática, HTTP, segurança e proxy              | 31 testes passaram                                |
-| PostgreSQL real/Testcontainers                            | 23 testes passaram                                |
-| Navegador desktop/celular                                 | 10 testes passaram                                |
-| Build, Compose e restauração estrutural                   | Passou                                            |
-| Auditoria de dependências                                 | Sem vulnerabilidades conhecidas nessa execução    |
-| Carga isolada de 100, 500 e 1.000 clientes WS com compras | Sem lacunas, duplicação ou divergência financeira |
-| Matemática exata × 1.000.000 de simulações                | Compatível com IC95% no relatório existente       |
+| Verificação executada                                     | Resultado integral aprovado                                                |
+| --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Instalação por lockfile, formatação, lint e TypeScript    | Passou                                                                     |
+| Domínio, matemática, HTTP, segurança e proxy              | 32 testes passaram                                                         |
+| PostgreSQL real/Testcontainers                            | 27 testes passaram                                                         |
+| Navegador desktop/celular                                 | 12 testes passaram                                                         |
+| Build, Compose e restauração estrutural                   | Passou                                                                     |
+| Auditoria de dependências                                 | Sem vulnerabilidades conhecidas nessa execução                             |
+| Carga isolada de 100, 500 e 1.000 clientes WS com compras | Sem lacunas, duplicação ou divergência financeira                          |
+| SMTP completo no Compose                                  | Recebimento, confirmação, login, crédito único e recusa de replay passaram |
+| Matemática exata × 1.000.000 de simulações                | Compatível com IC95% no relatório existente                                |
 
 O navegador testa jogo completo, MFA administrativo, recorrência, aprovação financeira por segunda pessoa e recuperação offline. Redis já participa do fan-out com replay durável; a página usa conexão WSS direta com ticket temporário. Existem interfaces de operação, suporte, segurança/privacidade, sessões, notificações, PWA offline, áudio opcional e qualidade gráfica adaptativa. Fundos de prêmios fixos são reservados sem comprometer valores ainda reembolsáveis de outras rodadas.
 

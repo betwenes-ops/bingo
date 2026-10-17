@@ -1,15 +1,15 @@
 # Fase 8 — Validação e publicação
 
-Status: implementação inicial; gate integral **ainda aberto**. O usuário autorizou continuação autônoma, sem novas aprovações.
+Atualização: 2026-10-17. Gate integral ainda aberto. Execução autônoma autorizada pelo usuário.
 
-## Entrega e verificação
+## Implementado e observado
 
-CI com PostgreSQL real/Testcontainers, testes de navegador, build, auditoria e artefatos.
+CI instala por lockfile, verifica padrões de segredos, formatação, lint, tipos, testes locais, PostgreSQL real, navegador desktop/celular, build, auditoria, Compose completo e restauração estrutural de backup. Os artefatos incluem evidências de navegador e carga. [Carga medida](../load-test-results.md) registra estágios de 100, 500 e 1.000 clientes com compras e prova final, sem divergências na execução registrada; não é medição da capacidade da hospedagem pública.
 
-Nenhum deploy público. Carga progressiva, segurança completa, observabilidade, runbooks e restauração ainda pendentes. Capacidade não foi medida; não há promessa de 10.000 jogadores.
+Railway possui jogador, API/WebSocket, administração, worker persistente e Redis autenticado com volume. Todos foram observados em SUCCESS e o heartbeat do worker foi comprovado no Supabase. Endereços e instruções atuais estão em [railway.md](../railway.md). O admin foi publicado após autorização explícita adicional; não foi criada conta padrão nem removido MFA. O banco usa schema privado com RLS. Existem runbooks e definições versionadas de métricas/alertas, ainda sem coletor/canal de alerta implantados.
 
-Comandos exatos no README da raiz. Saídas reais, cobertura, matemática e limites em [relatório consolidado](implementation-2026-10-16.md); logs em evidence/ e capturas em ../screenshots/. Não atribuir cobertura do domínio à carteira/API. Não confundir simulação matemática de partidas com carga de jogadores concorrentes.
+## Gates abertos
 
-## Decisões, pendências e riscos
+Envio real de e-mails, configuração final de Turnstile e fluxo público autenticado de ponta a ponta aguardam credenciais externas. A interface pública disponível não comprova cadastro e entrega de e-mail. Continuam pendentes autenticação de serviço para coleta de métricas, observabilidade distribuída, chaveiro/rotação de seeds e MFA, revisão independente, comprovação da credencial SQL restrita e restauração do banco público.
 
-[ADRs](../adr/README.md), [roadmap](../ROADMAP.md) e [riscos](../RISKS.md). Nenhum requisito pendente foi tratado como concluído; funcionalidades listadas como faltantes continuam no escopo do briefing. Não há custo contratado, operação monetária ou URL de produção.
+Não foram medidos 5.000/10.000 participantes, CPU/RAM sob carga da hospedagem, operação distribuída, redes móveis ou 50 fps em dispositivo-alvo. Não há certificação ou promessa de capacidade. Os relatórios distinguem dados medidos de testes apenas configurados. Dinheiro real permanece indisponível.
