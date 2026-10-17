@@ -79,6 +79,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - name: Configure isolated demo secret
         run: |
           cp .env.example .env
@@ -92,6 +95,8 @@ jobs:
             sleep 2
           done
           exit 1
+      - name: Verify real SMTP delivery, email confirmation and single credit grant
+        run: node tests/compose/email-smoke.mjs
       - name: Verify backup can be restored
         run: |
           docker compose exec -T postgres pg_dump -U bingo -Fc bingo > /tmp/bingo-backup.dump
