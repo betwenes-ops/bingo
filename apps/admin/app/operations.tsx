@@ -18,6 +18,7 @@ type Schedule = {
 };
 type Case = { id: string; email: string; subject: string; message: string; status: string };
 type Health = {
+  configuration: { smtpExternal: boolean };
   workers: { instance_id: string; healthy: boolean; updated_at: string; rounds_advanced: string }[];
   outbox: { pending: number };
   email: { pending: number; failed: number };
@@ -96,6 +97,12 @@ export function Operations({
         )}
         {health ? (
           <>
+            <p role={health.configuration.smtpExternal ? 'status' : 'alert'}>
+              Envio de e-mails:{' '}
+              {health.configuration.smtpExternal
+                ? 'servidor externo configurado — confira a entrega no provedor'
+                : 'provedor externo não configurado; confirmações e recuperação de senha não serão entregues'}
+            </p>
             <p role="status">
               Motor:{' '}
               {health.workers.some((w) => w.healthy)

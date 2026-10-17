@@ -2,6 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { readConfig } from './config';
 const base = { NODE_ENV: 'test', DATABASE_URL: 'unused', SEED_ENCRYPTION_KEY: '14'.repeat(32) };
 describe('Origens explícitas da implantação', () => {
+  it('valida endereço e protocolo SMTP antes de iniciar os serviços', () => {
+    for (const SMTP_URL of ['not-a-url', '', 'smtp://', 'https://mail.example.test'])
+      expect(() => readConfig({ ...base, SMTP_URL })).toThrow();
+    for (const SMTP_URL of [
+      'smtp://localhost:1025',
+      'smtp://mail.example.test:587',
+      'smtps://mail.example.test:465',
+    ])
+      expect(readConfig({ ...base, SMTP_URL }).SMTP_URL).toBe(SMTP_URL);
+  });
   it('inclui o site confirmado somente no projeto Railway correspondente', () => {
     const configured = readConfig({
       ...base,

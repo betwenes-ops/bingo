@@ -8,7 +8,17 @@ const schema = z.object({
   SEED_ENCRYPTION_KEY: z.string().regex(/^[0-9a-f]{64}$/),
   ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:3001'),
   PUBLIC_WEB_URL: z.url().default('http://localhost:3000'),
-  SMTP_URL: z.string().default('smtp://localhost:1025'),
+  SMTP_URL: z
+    .url()
+    .refine((value) => {
+      try {
+        const url = new URL(value);
+        return ['smtp:', 'smtps:'].includes(url.protocol) && Boolean(url.hostname);
+      } catch {
+        return false;
+      }
+    }, 'Use smtp:// or smtps:// with a hostname')
+    .default('smtp://localhost:1025'),
   MAIL_FROM: z.email().default('demo@bingo.local'),
   TURNSTILE_SECRET: z.string().optional(),
   TURNSTILE_SITE_KEY: z.string().optional(),
